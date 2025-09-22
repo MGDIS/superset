@@ -37,7 +37,7 @@ jobs:
     env:
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      IMAGE_TAG: apache/superset:GHA-${{ matrix.build_preset }}-${{ github.run_id }}
+      IMAGE_TAG: mgdis/superset:GHA-${{ matrix.build_preset }}-${{ github.run_id }}
 
     steps:
 
