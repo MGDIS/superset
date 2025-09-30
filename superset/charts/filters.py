@@ -21,17 +21,17 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.query import Query
 
-from superset import db, security_manager
+from superset import db, security_manager, is_feature_enabled
 from superset.connectors.sqla import models
-from superset.connectors.sqla.models import SqlaTable
+from superset.connectors.sqla.models import SqlaTable,sqlatable_roles
 from superset.models.core import FavStar
-from superset.models.slice import Slice
+from superset.models.slice import Slice, slice_user
 from superset.tags.filters import BaseTagIdFilter, BaseTagNameFilter
 from superset.utils.core import get_user_id
 from superset.utils.filters import get_dataset_access_filters
 from superset.views.base import BaseFilter
 from superset.views.base_api import BaseFavoriteFilter
-
+from flask_appbuilder.security.sqla.models import Role
 
 class ChartAllTextFilter(BaseFilter):  # pylint: disable=too-few-public-methods
     name = _("All Text")
@@ -109,7 +109,20 @@ class ChartFilter(BaseFilter):  # pylint: disable=too-few-public-methods
         query = query.join(
             models.Database, table_alias.database_id == models.Database.id
         )
-        return query.filter(get_dataset_access_filters(self.model))
+
+        feature_flagged_filters = []
+        if is_feature_enabled("DATASET_RBAC"):
+            # Select datasets authorized for this user's roles
+            roles_based_query = (
+                db.session.query(sqlatable_roles.c.table_id)
+                .filter(
+                    Role.id.in_([x.id for x in security_manager.get_user_roles()]),
+                )
+            )
+
+            feature_flagged_filters.append(SqlaTable.id.in_(roles_based_query))
+
+        return query.filter(or_(get_dataset_access_filters(self.model), *feature_flagged_filters))
 
 
 class ChartHasCreatedByFilter(BaseFilter):  # pylint: disable=too-few-public-methods

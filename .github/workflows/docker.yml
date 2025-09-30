@@ -122,6 +122,7 @@ jobs:
           docker compose build superset-init --build-arg DEV_MODE=false --build-arg INCLUDE_CHROMIUM=false
           docker compose up superset-init --exit-code-from superset-init
 
+
   docker-compose-image-tag:
     runs-on: ubuntu-24.04
     steps:
