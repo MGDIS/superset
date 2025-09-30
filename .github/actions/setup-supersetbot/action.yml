@@ -4,7 +4,7 @@ inputs:
   from-npm:
     description: 'Install from npm instead of local setup'
     required: false
-    default: 'true' # Defaults to using the local setup
+    default: 'false' # Defaults to using the local setup
 runs:
   using: 'composite'
   steps:
@@ -23,8 +23,9 @@ runs:
       if: ${{ inputs.from-npm == 'false' }}
       uses: actions/checkout@v4
       with:
-        repository: apache-superset/supersetbot
+        repository: mgdis/supersetbot
         path: supersetbot
+        ref: feat/use-env-for-dockerhub-repo
 
     - name: Setup supersetbot from repo
       if: ${{ inputs.from-npm == 'false' }}

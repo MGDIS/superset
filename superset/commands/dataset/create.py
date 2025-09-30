@@ -35,6 +35,7 @@ from superset.exceptions import SupersetSecurityException
 from superset.extensions import security_manager
 from superset.sql_parse import Table
 from superset.utils.decorators import on_error, transaction
+from superset.commands.utils import populate_roles
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,7 @@ class CreateDatasetCommand(CreateMixin, BaseCommand):
         table_name = self._properties["table_name"]
         sql = self._properties.get("sql")
         owner_ids: Optional[list[int]] = self._properties.get("owners")
+        role_ids: Optional[list[int]] = self._properties.get("roles")
 
         # Validate/Populate database
         database = DatasetDAO.get_database_by_id(database_id)
@@ -98,6 +100,15 @@ class CreateDatasetCommand(CreateMixin, BaseCommand):
         try:
             owners = self.populate_owners(owner_ids)
             self._properties["owners"] = owners
+        except ValidationError as ex:
+            exceptions.append(ex)
+        if exceptions:
+            raise DatasetInvalidError(exceptions=exceptions)
+
+        # Validate roles
+        try:
+            roles = populate_roles(role_ids)
+            self._properties["roles"] = roles
         except ValidationError as ex:
             exceptions.append(ex)
         if exceptions:

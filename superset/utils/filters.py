@@ -19,7 +19,7 @@ from typing import Any
 from flask_appbuilder import Model
 from sqlalchemy import or_
 from sqlalchemy.sql.elements import BooleanClauseList
-
+from flask_appbuilder.security.sqla.models import Role
 
 def get_dataset_access_filters(
     base_model: type[Model],
@@ -28,11 +28,20 @@ def get_dataset_access_filters(
     # pylint: disable=import-outside-toplevel
     from superset import security_manager
     from superset.connectors.sqla.models import Database
+    from superset.connectors.sqla.models import sqlatable_roles
 
     database_ids = security_manager.get_accessible_databases()
     perms = security_manager.user_view_menu_names("datasource_access")
     schema_perms = security_manager.user_view_menu_names("schema_access")
     catalog_perms = security_manager.user_view_menu_names("catalog_access")
+
+    # Select datasets authorized for this user's roles
+    roles_based_query = (
+        security_manager.get_session.query(sqlatable_roles.c.table_id)
+        .filter(
+            Role.id.in_([x.id for x in security_manager.get_user_roles()]),
+        )
+    )
 
     return or_(
         Database.id.in_(database_ids),

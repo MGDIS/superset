@@ -37,11 +37,12 @@ from flask_appbuilder import BaseView, Model, ModelView
 from flask_appbuilder.actions import action
 from flask_appbuilder.forms import DynamicForm
 from flask_appbuilder.models.sqla.filters import BaseFilter
-from flask_appbuilder.security.sqla.models import User
+from flask_appbuilder.security.sqla.models import User, Role
 from flask_appbuilder.widgets import ListWidget
 from flask_babel import get_locale, gettext as __
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_wtf.form import FlaskForm
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from wtforms.fields.core import Field, UnboundField
 
@@ -64,6 +65,8 @@ from superset.translations.utils import get_language_pack
 from superset.utils import core as utils, json
 from superset.utils.filters import get_dataset_access_filters
 from superset.views.error_handling import json_error_response
+from superset.connectors.sqla.models import SqlaTable
+from superset.connectors.sqla.models import sqlatable_roles
 
 from .utils import bootstrap_user_data
 
@@ -443,11 +446,25 @@ class DatasourceFilter(BaseFilter):  # pylint: disable=too-few-public-methods
     def apply(self, query: Query, value: Any) -> Query:
         if security_manager.can_access_all_datasources():
             return query
+
         query = query.join(
             models.Database,
             models.Database.id == self.model.database_id,
         )
-        return query.filter(get_dataset_access_filters(self.model))
+
+        feature_flagged_filters = []
+        if is_feature_enabled("DATASET_RBAC"):
+            # Select datasets authorized for this user's roles
+            roles_based_query = (
+                db.session.query(sqlatable_roles.c.table_id)
+                .filter(
+                    Role.id.in_([x.id for x in security_manager.get_user_roles()]),
+                )
+            )
+
+            feature_flagged_filters.append(SqlaTable.id.in_(roles_based_query))
+
+        return query.filter(or_(get_dataset_access_filters(self.model), *feature_flagged_filters))
 
 
 class CsvResponse(Response):
