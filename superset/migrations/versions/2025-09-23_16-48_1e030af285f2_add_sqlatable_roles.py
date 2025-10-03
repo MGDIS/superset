@@ -23,22 +23,24 @@ Create Date: 2025-09-23 16:48:44.783375
 """
 
 # revision identifiers, used by Alembic.
-revision = '1e030af285f2'
-down_revision = '74ad1125881c'
+revision = "1e030af285f2"
+down_revision = "74ad1125881c"
 
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+import sqlalchemy as sa  # noqa: E402
+from alembic import op  # noqa: E402
+
 
 def upgrade():
-    op.create_table('sqlatable_roles',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('role_id', sa.Integer(), nullable=True),
-    sa.Column('table_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['role_id'], ['ab_role.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['table_id'], ['tables.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'))
+    op.create_table(
+        "sqlatable_roles",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("role_id", sa.Integer(), nullable=True),
+        sa.Column("table_id", sa.Integer(), nullable=True),
+        sa.ForeignKeyConstraint(["role_id"], ["ab_role.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["table_id"], ["tables.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
 
 
 def downgrade():
-    op.drop_table('sqlatable_roles')
+    op.drop_table("sqlatable_roles")

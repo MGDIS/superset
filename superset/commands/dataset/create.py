@@ -30,12 +30,12 @@ from superset.commands.dataset.exceptions import (
     DatasetInvalidError,
     TableNotFoundValidationError,
 )
+from superset.commands.utils import populate_roles
 from superset.daos.dataset import DatasetDAO
 from superset.exceptions import SupersetSecurityException
 from superset.extensions import security_manager
 from superset.sql_parse import Table
 from superset.utils.decorators import on_error, transaction
-from superset.commands.utils import populate_roles
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,9 @@ class CreateDatasetCommand(CreateMixin, BaseCommand):
         dataset.fetch_metadata()
         return dataset
 
-    def validate(self) -> None:
+    def validate(  # noqa: C901
+        self,
+    ) -> None:
         exceptions: list[ValidationError] = []
         database_id = self._properties["database"]
         catalog = self._properties.get("catalog")

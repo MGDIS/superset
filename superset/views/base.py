@@ -37,12 +37,12 @@ from flask_appbuilder import BaseView, Model, ModelView
 from flask_appbuilder.actions import action
 from flask_appbuilder.forms import DynamicForm
 from flask_appbuilder.models.sqla.filters import BaseFilter
-from flask_appbuilder.security.sqla.models import User, Role
+from flask_appbuilder.security.sqla.models import User
 from flask_appbuilder.widgets import ListWidget
 from flask_babel import get_locale, gettext as __
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_wtf.form import FlaskForm
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
 from sqlalchemy.orm import Query
 from wtforms.fields.core import Field, UnboundField
 
@@ -56,6 +56,7 @@ from superset import (
     security_manager,
 )
 from superset.connectors.sqla import models
+from superset.connectors.sqla.models import SqlaTable, sqlatable_roles
 from superset.db_engine_specs import get_available_engine_specs
 from superset.db_engine_specs.gsheets import GSheetsEngineSpec
 from superset.extensions import cache_manager
@@ -65,8 +66,6 @@ from superset.translations.utils import get_language_pack
 from superset.utils import core as utils, json
 from superset.utils.filters import get_dataset_access_filters
 from superset.views.error_handling import json_error_response
-from superset.connectors.sqla.models import SqlaTable
-from superset.connectors.sqla.models import sqlatable_roles
 
 from .utils import bootstrap_user_data
 
@@ -463,13 +462,16 @@ class DatasourceFilter(BaseFilter):  # pylint: disable=too-few-public-methods
                 )
                 .filter(
                     sqlatable_roles.c.role_id.in_(
-                        [x.id for x in security_manager.get_user_roles()]),
+                        [x.id for x in security_manager.get_user_roles()]
+                    ),
                 )
             )
 
             feature_flagged_filters.append(SqlaTable.id.in_(roles_based_query))
 
-        return query.filter(or_(get_dataset_access_filters(self.model), *feature_flagged_filters))
+        return query.filter(
+            or_(get_dataset_access_filters(self.model), *feature_flagged_filters)
+        )
 
 
 class CsvResponse(Response):
