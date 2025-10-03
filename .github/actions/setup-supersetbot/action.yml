@@ -25,7 +25,6 @@ runs:
       with:
         repository: mgdis/supersetbot
         path: supersetbot
-        ref: feat/use-env-for-dockerhub-repo
 
     - name: Setup supersetbot from repo
       if: ${{ inputs.from-npm == 'false' }}

@@ -110,13 +110,18 @@ class ChartFilter(BaseFilter):  # pylint: disable=too-few-public-methods
             models.Database, table_alias.database_id == models.Database.id
         )
 
+        # Select datasets authorized for this user's roles
         feature_flagged_filters = []
         if is_feature_enabled("DATASET_RBAC"):
-            # Select datasets authorized for this user's roles
             roles_based_query = (
                 db.session.query(sqlatable_roles.c.table_id)
+                .join(
+                    models.SqlaTable,
+                    models.SqlaTable.id == sqlatable_roles.c.table_id,
+                )
                 .filter(
-                    Role.id.in_([x.id for x in security_manager.get_user_roles()]),
+                    sqlatable_roles.c.role_id.in_(
+                        [x.id for x in security_manager.get_user_roles()]),
                 )
             )
 
