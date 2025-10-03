@@ -86,7 +86,11 @@ from superset.views.base_api import (
     statsd_metrics,
 )
 from superset.views.error_handling import handle_api_exception
-from superset.views.filters import BaseFilterRelatedUsers, FilterRelatedOwners, BaseFilterRelatedRoles
+from superset.views.filters import (
+    BaseFilterRelatedRoles,
+    BaseFilterRelatedUsers,
+    FilterRelatedOwners,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +236,15 @@ class DatasetRestApi(BaseSupersetModelRestApi):
     add_model_schema = DatasetPostSchema()
     edit_model_schema = DatasetPutSchema()
     duplicate_model_schema = DatasetDuplicateSchema()
-    add_columns = ["database", "catalog", "schema", "table_name", "sql", "owners", "roles"]
+    add_columns = [
+        "database",
+        "catalog",
+        "schema",
+        "table_name",
+        "sql",
+        "owners",
+        "roles",
+    ]
     edit_columns = [
         "table_name",
         "sql",

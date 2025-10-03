@@ -39,12 +39,12 @@ from superset.commands.dataset.exceptions import (
     DatasetNotFoundError,
     DatasetUpdateFailedError,
 )
+from superset.commands.utils import populate_roles
 from superset.connectors.sqla.models import SqlaTable
 from superset.daos.dataset import DatasetDAO
 from superset.exceptions import SupersetSecurityException
 from superset.sql_parse import Table
 from superset.utils.decorators import on_error, transaction
-from superset.commands.utils import populate_roles
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,9 @@ class UpdateDatasetCommand(UpdateMixin, BaseCommand):
         assert self._model
         return DatasetDAO.update(self._model, attributes=self._properties)
 
-    def validate(self) -> None:
+    def validate(  # noqa: C901
+        self,
+    ) -> None:
         exceptions: list[ValidationError] = []
         owner_ids: Optional[list[int]] = self._properties.get("owners")
         role_ids: Optional[list[int]] = self._properties.get("roles")

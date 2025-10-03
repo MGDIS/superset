@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 import sqlalchemy as sa
 from flask_appbuilder import Model
-from flask_appbuilder.security.sqla.models import User, Role
+from flask_appbuilder.security.sqla.models import Role, User
 from flask_babel import gettext as __, lazy_gettext as _
 from jinja2.exceptions import TemplateError
 from markupsafe import escape, Markup
@@ -1155,6 +1155,7 @@ sqlatable_roles = DBTable(
     Column("role_id", Integer, ForeignKey("ab_role.id", ondelete="CASCADE")),
     Column("table_id", Integer, ForeignKey("tables.id", ondelete="CASCADE")),
 )
+
 
 class SqlaTable(
     Model,

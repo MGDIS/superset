@@ -20,6 +20,7 @@ from flask_appbuilder import Model
 from sqlalchemy import or_
 from sqlalchemy.sql.elements import BooleanClauseList
 
+
 def get_dataset_access_filters(
     base_model: type[Model],
     *args: Any,
