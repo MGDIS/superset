@@ -56,7 +56,7 @@ from superset import (
     security_manager,
 )
 from superset.connectors.sqla import models
-from superset.connectors.sqla.models import SqlaTable, sqlatable_roles
+from superset.connectors.sqla.models import SqlaTable
 from superset.db_engine_specs import get_available_engine_specs
 from superset.db_engine_specs.gsheets import GSheetsEngineSpec
 from superset.extensions import cache_manager
@@ -67,6 +67,7 @@ from superset.utils import core as utils, json
 from superset.utils.filters import get_dataset_access_filters
 from superset.views.error_handling import json_error_response
 
+from ..utils.datasets import get_datasets_authorized_for_user_roles
 from .utils import bootstrap_user_data
 
 FRONTEND_CONF_KEYS = (
@@ -454,19 +455,7 @@ class DatasourceFilter(BaseFilter):  # pylint: disable=too-few-public-methods
         # Select datasets authorized for this user's roles
         feature_flagged_filters = []
         if is_feature_enabled("DATASET_RBAC"):
-            roles_based_query = (
-                db.session.query(sqlatable_roles.c.table_id)
-                .join(
-                    models.SqlaTable,
-                    models.SqlaTable.id == sqlatable_roles.c.table_id,
-                )
-                .filter(
-                    sqlatable_roles.c.role_id.in_(
-                        [x.id for x in security_manager.get_user_roles()]
-                    ),
-                )
-            )
-
+            roles_based_query = get_datasets_authorized_for_user_roles()
             feature_flagged_filters.append(SqlaTable.id.in_(roles_based_query))
 
         return query.filter(
