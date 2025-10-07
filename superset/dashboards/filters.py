@@ -125,7 +125,9 @@ class DashboardAccessFilter(BaseFilter):  # pylint: disable=too-few-public-metho
 
         # Select datasets authorized for this user's roles
         feature_flagged_filters = []
-        if not is_feature_enabled("DASHBOARD_RBAC") and is_feature_enabled("DATASET_RBAC"):
+        if not is_feature_enabled("DASHBOARD_RBAC") and is_feature_enabled(
+            "DATASET_RBAC"
+        ):
             roles_based_query = get_datasets_authorized_for_user_roles()
             feature_flagged_filters.append(SqlaTable.id.in_(roles_based_query))
 
