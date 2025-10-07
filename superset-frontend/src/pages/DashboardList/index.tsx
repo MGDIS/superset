@@ -408,7 +408,7 @@ function DashboardList(props: DashboardListProps) {
         Cell: ({ row: { original } }: any) => {
           // Verify owner or isAdmin
           const allowEditDelete: boolean =
-            original.owners.map((o: Owner) => o.id).includes(user.userId) ||
+            original.owners?.map((o: Owner) => o.id).includes(user.userId) ||
             isUserAdmin(user);
 
           const handleDelete = () =>
