@@ -66,6 +66,11 @@ interface ExtendedDatasource extends Datasource {
     last_name: string;
     value?: number;
   }>;
+  roles?: Array<{
+    id: number;
+    name: string;
+    value?: number;
+  }>;
   extra?: string;
   health_check_message?: string;
   database?: {

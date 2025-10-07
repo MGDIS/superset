@@ -59,6 +59,7 @@ import {
   Divider,
   EditableTitle,
   Flex,
+  FormItem,
   FormLabel,
   Icons,
   InfoTooltip,
@@ -114,6 +115,14 @@ interface Owner {
   first_name?: string;
   last_name?: string;
   email?: string;
+  [key: string]: unknown;
+}
+
+interface Role {
+  id?: number;
+  value?: number;
+  name?: string;
+  label?: string;
   [key: string]: unknown;
 }
 
@@ -181,6 +190,7 @@ interface DatasourceObject {
   columns: Column[];
   metrics?: Metric[];
   owners: Owner[];
+  roles?: Role[];
   main_dttm_col?: string;
   currency_code_column?: string;
   filter_select_enabled?: boolean;
@@ -326,6 +336,11 @@ interface FormContainerProps {
 interface OwnersSelectorProps {
   datasource: DatasourceObject;
   onChange: (owners: Owner[]) => void;
+}
+
+interface RolesSelectorProps {
+  datasource: DatasourceObject;
+  onChange: (roles: Role[]) => void;
 }
 
 const DatasourceContainer = styled.div`
@@ -836,6 +851,45 @@ function OwnersSelector({
     />
   );
 }
+
+function RolesSelector({
+  datasource,
+  onChange,
+}: RolesSelectorProps): JSX.Element {
+  const loadOptions = useCallback(
+    (
+      search = '',
+      page: number,
+      pageSize: number,
+    ): Promise<{ data: Role[]; totalCount: number }> => {
+      const query = rison.encode({ filter: search, page, page_size: pageSize });
+      return SupersetClient.get({
+        endpoint: `/api/v1/dataset/related/roles?q=${query}`,
+      }).then(response => ({
+        data: (response.json.result as Array<JsonObject>).map(item => ({
+          value: item.value as number,
+          label: item.text as string,
+        })),
+        totalCount: response.json.count,
+      }));
+    },
+    [],
+  );
+
+  return (
+    <AsyncSelect
+      ariaLabel={t('Select roles')}
+      mode="multiple"
+      name="roles"
+      value={datasource.roles as { value: number; label: string }[]}
+      options={loadOptions}
+      onChange={value => onChange(value as Role[])}
+      header={<FormLabel>{t('Roles')}</FormLabel>}
+      allowClear
+    />
+  );
+}
+
 const ResultTable =
   extensionsRegistry.get('sqleditor.extension.resultTable') ?? FilterableTable;
 
@@ -919,6 +973,10 @@ class DatasourceEditor extends PureComponent<
             [OWNER_EMAIL_PROP]: owner.email ?? '',
           };
         }),
+        roles: props.datasource.roles?.map(role => ({
+          value: role.value || role.id,
+          label: role.name,
+        })),
         metrics: props.datasource.metrics?.map(metric => {
           const {
             certified_by: certifiedByMetric,
@@ -1630,12 +1688,37 @@ class DatasourceEditor extends PureComponent<
             }
           />
         )}
-        <OwnersSelector
-          datasource={datasource}
-          onChange={newOwners => {
-            this.onDatasourceChange({ ...datasource, owners: newOwners });
-          }}
-        />
+      </Fieldset>
+    );
+  }
+
+  renderSecurityFieldset() {
+    const { datasource } = this.state;
+    return (
+      <Fieldset
+        title={t('Access')}
+        item={datasource}
+        onChange={this.onDatasourceChange}
+      >
+        <FormItem>
+          <OwnersSelector
+            datasource={datasource}
+            onChange={newOwners => {
+              this.onDatasourceChange({ ...datasource, owners: newOwners });
+            }}
+          />
+        </FormItem>
+
+        {isFeatureEnabled(FeatureFlag.DatasetRbac) && (
+          <FormItem>
+            <RolesSelector
+              datasource={datasource}
+              onChange={newRoles => {
+                this.onDatasourceChange({ ...datasource, roles: newRoles });
+              }}
+            />
+          </FormItem>
+        )}
       </Fieldset>
     );
   }
@@ -2553,6 +2636,10 @@ class DatasourceEditor extends PureComponent<
                       </FormContainer>
                     </Col>
                     <Col xs={24} md={12}>
+                      <FormContainer>
+                        {this.renderSecurityFieldset()}
+                      </FormContainer>
+                      <br />
                       <FormContainer>
                         {this.renderAdvancedFieldset()}
                       </FormContainer>

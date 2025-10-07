@@ -38,6 +38,7 @@ export enum FeatureFlag {
   DashboardRbac = 'DASHBOARD_RBAC',
   DatapanelClosedByDefault = 'DATAPANEL_CLOSED_BY_DEFAULT',
   DatasetFolders = 'DATASET_FOLDERS',
+  DatasetRbac = 'DATASET_RBAC',
   DateRangeTimeshiftsEnabled = 'DATE_RANGE_TIMESHIFTS_ENABLED',
   DisableEmbeddedSupersetLogout = 'DISABLE_EMBEDDED_SUPERSET_LOGOUT',
   /** @deprecated */

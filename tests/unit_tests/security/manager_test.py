@@ -22,6 +22,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from flask import g
 from flask_appbuilder.security.sqla.models import Role, User
 from pytest_mock import MockerFixture
 
@@ -30,6 +31,7 @@ from superset.connectors.sqla.models import Database, SqlaTable
 from superset.exceptions import SupersetSecurityException
 from superset.extensions import appbuilder
 from superset.models.slice import Slice
+from superset.security.guest_token import GuestTokenResourceType
 from superset.security.manager import (
     query_context_modified,
     SupersetSecurityManager,
@@ -37,6 +39,7 @@ from superset.security.manager import (
 from superset.sql.parse import Table
 from superset.superset_typing import AdhocColumn, AdhocMetric
 from superset.utils.core import DatasourceName, override_user
+from tests.unit_tests.conftest import with_feature_flags
 
 
 def test_security_manager(app_context: None) -> None:
@@ -88,6 +91,17 @@ def test_raise_for_access_guest_user_ok(
     sm = SupersetSecurityManager(appbuilder)
     mocker.patch.object(sm, "is_guest_user", return_value=True)
     mocker.patch.object(sm, "can_access", return_value=True)
+    g.user = sm.get_guest_user_from_token(
+        {
+            "user": {},
+            "resources": [
+                {"type": GuestTokenResourceType.DASHBOARD, "id": "some-uuid"}
+            ],
+            "rls_rules": [],
+            "iat": 0,
+            "exp": 0,
+        }
+    )
 
     query_context = mocker.MagicMock()
     query_context.slice_.id = 42
@@ -118,6 +132,17 @@ def test_raise_for_access_guest_user_ok_subset(
     sm = SupersetSecurityManager(appbuilder)
     mocker.patch.object(sm, "is_guest_user", return_value=True)
     mocker.patch.object(sm, "can_access", return_value=True)
+    g.user = sm.get_guest_user_from_token(
+        {
+            "user": {},
+            "resources": [
+                {"type": GuestTokenResourceType.DASHBOARD, "id": "some-uuid"}
+            ],
+            "rls_rules": [],
+            "iat": 0,
+            "exp": 0,
+        }
+    )
 
     query_context = mocker.MagicMock()
     query_context.slice_.id = 42
@@ -593,6 +618,98 @@ def test_raise_for_access_chart_owner(
         sm.raise_for_access(
             chart=slice,
         )
+
+
+def _create_dataset_with_role(sm: SupersetSecurityManager, role: Role) -> SqlaTable:
+    """
+    Create a dataset that gives access to the users with the role.
+    """
+    session = sm.session
+
+    engine = session.get_bind()
+    SqlaTable.metadata.create_all(engine)  # pylint: disable=no-member
+
+    dataset = SqlaTable(
+        table_name="my_table",
+        database=Database(database_name="my_database", sqlalchemy_uri="sqlite://"),
+        roles=[role],
+    )
+    session.add(dataset)
+    session.flush()
+    return dataset
+
+
+@with_feature_flags(DATASET_RBAC=True)
+def test_raise_for_access_datasource_role(
+    mocker: MockerFixture,
+    app_context: None,
+) -> None:
+    """
+    Test that a role set on a dataset gives access to this dataset,
+    when the user has no access to the table, the schema or the database
+    """
+    sm = SupersetSecurityManager(appbuilder)
+
+    # Remove the access to the table, the schema and the database
+    mocker.patch.object(sm, "can_access", return_value=False)
+
+    dataset_role = Role(name="dataset_role")
+    dataset = _create_dataset_with_role(sm, dataset_role)
+
+    alice = User(
+        first_name="Alice",
+        last_name="Doe",
+        email="alice@example.org",
+        username="alice",
+        roles=[dataset_role],
+    )
+    bob = User(
+        first_name="Bob",
+        last_name="Doe",
+        email="bob@example.org",
+        username="bob",
+        roles=[Role(name="other_role")],
+    )
+
+    # A user without the dataset role cannot access the dataset
+    with override_user(bob):
+        with pytest.raises(SupersetSecurityException):
+            sm.raise_for_access(datasource=dataset)
+
+    # A user with the dataset role can access the dataset
+    with override_user(alice):
+        sm.raise_for_access(datasource=dataset)
+
+
+@with_feature_flags(DATASET_RBAC=False)
+def test_raise_for_access_datasource_role_rbac_disabled(
+    mocker: MockerFixture,
+    app_context: None,
+) -> None:
+    """
+    Test that a role set on a dataset does not give access to this dataset,
+    when dataset RBAC is disabled
+    """
+    sm = SupersetSecurityManager(appbuilder)
+
+    # Remove the access to the table, the schema and the database
+    mocker.patch.object(sm, "can_access", return_value=False)
+
+    dataset_role = Role(name="dataset_role")
+    dataset = _create_dataset_with_role(sm, dataset_role)
+
+    alice = User(
+        first_name="Alice",
+        last_name="Doe",
+        email="alice@example.org",
+        username="alice",
+        roles=[dataset_role],
+    )
+
+    # The dataset role does not give access to the dataset
+    with override_user(alice):
+        with pytest.raises(SupersetSecurityException):
+            sm.raise_for_access(datasource=dataset)
 
 
 def test_query_context_modified(

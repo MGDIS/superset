@@ -24,7 +24,11 @@ import {
   userEvent,
   within,
 } from 'spec/helpers/testing-library';
-import { DatasourceType, isFeatureEnabled } from '@superset-ui/core';
+import {
+  DatasourceType,
+  FeatureFlag,
+  isFeatureEnabled,
+} from '@superset-ui/core';
 import {
   createProps,
   DATASOURCE_ENDPOINT,
@@ -262,6 +266,50 @@ test('renders isSqla fields', async () => {
   expect(extraField.length).toBeGreaterThan(0);
   expect(screen.getByText(/autocomplete query predicate/i)).toBeInTheDocument();
   expect(screen.getByText(/template parameters/i)).toBeInTheDocument();
+});
+
+test('renders the roles field when dataset RBAC is enabled', async () => {
+  (isFeatureEnabled as jest.Mock).mockImplementation(
+    (flag: FeatureFlag) => flag === FeatureFlag.DatasetRbac,
+  );
+
+  const testProps = createProps();
+  await asyncRender({
+    ...testProps,
+    datasource: { ...testProps.datasource, table_name: 'Vehicle Sales +' },
+  });
+
+  const settingsTab = screen.getByRole('tab', {
+    name: /settings/i,
+  });
+  await userEvent.click(settingsTab);
+
+  expect(
+    screen.getByRole('combobox', { name: 'Select roles' }),
+  ).toBeInTheDocument();
+});
+
+test('hides the roles field when dataset RBAC is disabled', async () => {
+  (isFeatureEnabled as jest.Mock).mockImplementation(() => false);
+
+  const testProps = createProps();
+  await asyncRender({
+    ...testProps,
+    datasource: { ...testProps.datasource, table_name: 'Vehicle Sales +' },
+  });
+
+  const settingsTab = screen.getByRole('tab', {
+    name: /settings/i,
+  });
+  await userEvent.click(settingsTab);
+
+  // The owners field stays, so the settings tab is rendered
+  expect(
+    screen.getByRole('combobox', { name: 'Select owners' }),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole('combobox', { name: 'Select roles' }),
+  ).not.toBeInTheDocument();
 });
 
 test('Source Tab: edit mode', async () => {

@@ -43,6 +43,7 @@ from flask_appbuilder.security.sqla.models import User
 from flask_babel import get_locale, gettext as __
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_wtf.form import FlaskForm
+from sqlalchemy import or_
 from sqlalchemy.orm import Query
 from wtforms.fields.core import Field, UnboundField
 
@@ -54,6 +55,7 @@ from superset import (
     security_manager,
 )
 from superset.connectors.sqla import models
+from superset.connectors.sqla.models import SqlaTable
 from superset.daos.theme import ThemeDAO
 from superset.db_engine_specs import get_available_engine_specs
 from superset.db_engine_specs.gsheets import GSheetsEngineSpec
@@ -66,6 +68,7 @@ from superset.themes.utils import (
     is_valid_theme,
 )
 from superset.utils import core as utils, json
+from superset.utils.datasets import get_datasets_authorized_for_user_roles
 from superset.utils.filters import get_dataset_access_filters
 from superset.utils.version import get_version_metadata
 from superset.views.error_handling import json_error_response
@@ -703,11 +706,21 @@ class DatasourceFilter(BaseFilter):  # pylint: disable=too-few-public-methods
     def apply(self, query: Query, value: Any) -> Query:
         if security_manager.can_access_all_datasources():
             return query
+
         query = query.join(
             models.Database,
             models.Database.id == self.model.database_id,
         )
-        return query.filter(get_dataset_access_filters(self.model))
+
+        # Select datasets authorized for this user's roles
+        feature_flagged_filters = []
+        if is_feature_enabled("DATASET_RBAC"):
+            roles_based_query = get_datasets_authorized_for_user_roles()
+            feature_flagged_filters.append(SqlaTable.id.in_(roles_based_query))  # type: ignore[attr-defined,unused-ignore]
+
+        return query.filter(
+            or_(get_dataset_access_filters(self.model), *feature_flagged_filters)
+        )
 
 
 class CsvResponse(Response):

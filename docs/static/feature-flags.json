@@ -262,6 +262,13 @@
         "category": "runtime_config"
       },
       {
+        "name": "DATASET_RBAC",
+        "default": false,
+        "lifecycle": "stable",
+        "description": "Role-based access control for datasets",
+        "category": "runtime_config"
+      },
+      {
         "name": "DISABLE_EMBEDDED_SUPERSET_LOGOUT",
         "default": false,
         "lifecycle": "stable",

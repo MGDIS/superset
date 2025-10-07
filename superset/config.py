@@ -714,6 +714,10 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
     # @lifecycle: stable
     # @category: runtime_config
     "DATAPANEL_CLOSED_BY_DEFAULT": False,
+    # Role-based access control for datasets
+    # @lifecycle: stable
+    # @category: runtime_config
+    "DATASET_RBAC": False,
     # Hide the logout button in embedded contexts (e.g., when using SSO in iframes)
     # @lifecycle: stable
     # @category: runtime_config

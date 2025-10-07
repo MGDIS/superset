@@ -176,6 +176,9 @@ const DatasourceModal: FunctionComponent<DatasourceModalProps> = ({
       owners: datasource.owners.map(
         (o: Record<string, number>) => o.value || o.id,
       ),
+      roles: datasource.roles.map(
+        (o: Record<string, number>) => o.value || o.id,
+      ),
     };
     // Add folders if DATASET_FOLDERS feature is enabled
     if (isFeatureEnabled(FeatureFlag.DatasetFolders) && datasource.folders) {

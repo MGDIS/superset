@@ -234,6 +234,7 @@ class ExplorableData(TypedDict, total=False):
         folders: Folder structure (JSON field)
         order_by_choices: Available ordering options
         owners: List of owner IDs or owner details
+        roles: List of role IDs or role details
         verbose_map: Mapping of column/metric names to verbose names
         select_star: SELECT * query for this datasource
 
@@ -279,6 +280,7 @@ class ExplorableData(TypedDict, total=False):
     folders: Any  # JSON field, can be list or dict
     order_by_choices: list[tuple[str, str]]
     owners: list[int] | list[dict[str, Any]]  # Can be either format
+    roles: list[int] | list[dict[str, Any]]  # Can be either format
     verbose_map: dict[str, str]
     select_star: str | None
 

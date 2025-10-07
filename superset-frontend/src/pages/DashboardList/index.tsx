@@ -77,6 +77,7 @@ import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { findPermission } from 'src/utils/findPermission';
 import { navigateTo } from 'src/utils/navigationUtils';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
+import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
 
 const PAGE_SIZE = 25;
 const PASSWORDS_NEEDED_MESSAGE = t(
@@ -428,6 +429,11 @@ function DashboardList(props: DashboardListProps) {
       },
       {
         Cell: ({ row: { original } }: any) => {
+          // Verify owner or isAdmin
+          const allowEditDelete: boolean =
+            original.owners?.map((o: Owner) => o.id).includes(user.userId) ||
+            isUserAdmin(user);
+
           const handleDelete = () =>
             handleDashboardDelete(
               original,
@@ -443,14 +449,20 @@ function DashboardList(props: DashboardListProps) {
               {canEdit && (
                 <Tooltip
                   id="edit-action-tooltip"
-                  title={t('Edit')}
+                  title={
+                    allowEditDelete
+                      ? t('Edit')
+                      : t(
+                          'You must be a dashboard owner in order to edit. Please reach out to a dashboard owner to request modifications or edit access.',
+                        )
+                  }
                   placement="bottom"
                 >
                   <span
                     role="button"
                     tabIndex={0}
-                    className="action-button"
-                    onClick={handleEdit}
+                    className={allowEditDelete ? 'action-button' : 'disabled'}
+                    onClick={allowEditDelete ? handleEdit : undefined}
                   >
                     <Icons.EditOutlined data-test="edit-alt" iconSize="l" />
                   </span>
@@ -486,14 +498,22 @@ function DashboardList(props: DashboardListProps) {
                   {confirmDelete => (
                     <Tooltip
                       id="delete-action-tooltip"
-                      title={t('Delete')}
+                      title={
+                        allowEditDelete
+                          ? t('Delete')
+                          : t(
+                              'You must be a dashboard owner in order to delete. Please reach out to a dashboard owner to request modifications or edit access.',
+                            )
+                      }
                       placement="bottom"
                     >
                       <span
                         role="button"
                         tabIndex={0}
-                        className="action-button"
-                        onClick={confirmDelete}
+                        className={
+                          allowEditDelete ? 'action-button' : 'disabled'
+                        }
+                        onClick={allowEditDelete ? confirmDelete : undefined}
                       >
                         <Icons.DeleteOutlined
                           iconSize="l"

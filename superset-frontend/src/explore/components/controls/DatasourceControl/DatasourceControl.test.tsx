@@ -105,6 +105,7 @@ const mockDatasource: TestDatasource = {
   type: DatasourceType.Table,
   columns: [],
   owners: [{ first_name: 'john', last_name: 'doe', id: 1, username: 'jd' }],
+  roles: [{ name: 'Gamma', id: 1 }],
   sql: 'SELECT * FROM mock_datasource_sql',
 };
 
@@ -304,6 +305,7 @@ test('Edit dataset should be disabled when user is not admin', async () => {
   const props = createProps();
   props.user.roles = {};
   props.datasource.owners = [];
+  props.datasource.roles = [];
 
   render(<DatasourceControl {...props} />, {
     useRedux: true,

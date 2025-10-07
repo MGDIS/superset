@@ -423,6 +423,9 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
       {
         Cell: ({ row: { original } }: any) => {
           // Verify owner or isAdmin
+          const allowDelete =
+            original.owners.map((o: Owner) => o.id).includes(user.userId) ||
+            isUserAdmin(user);
           const allowEdit =
             original.owners.map((o: Owner) => o.id).includes(user.userId) ||
             isUserAdmin(user);
@@ -493,14 +496,20 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
               {canDelete && (
                 <Tooltip
                   id="delete-action-tooltip"
-                  title={t('Delete')}
+                  title={
+                    allowDelete
+                      ? t('Delete')
+                      : t(
+                          'You must be a dataset owner in order to delete. Please reach out to a dataset owner to request modifications or edit access.',
+                        )
+                  }
                   placement="bottom"
                 >
                   <span
                     role="button"
                     tabIndex={0}
-                    className="action-button"
-                    onClick={handleDelete}
+                    className={`action-button ${allowDelete ? '' : 'disabled'}`}
+                    onClick={allowDelete ? handleDelete : undefined}
                   >
                     <Icons.DeleteOutlined iconSize="l" />
                   </span>
