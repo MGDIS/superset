@@ -29,14 +29,16 @@ import {
   finestTemporalGrainFormatter,
   t,
   tn,
+  ChartDataResponseResult,
 } from '@superset-ui/core';
 import { LabeledValue as AntdLabeledValue } from 'antd/lib/select';
-import { debounce } from 'lodash';
+import { debounce, cloneDeep } from 'lodash';
 import { useImmerReducer } from 'use-immer';
 import { Select } from 'src/components';
 import { SLOW_DEBOUNCE } from 'src/constants';
 import { hasOption, propertyComparator } from 'src/components/Select/utils';
 import { FilterBarOrientation } from 'src/dashboard/types';
+import { getChartDataRequest } from 'src/components/Chart/chartAction';
 import { PluginFilterSelectProps, SelectValue } from './types';
 import { FilterPluginStyle, StatusMessage, StyledFormItem } from '../common';
 import { getDataRecordFormatter, getSelectExtraFormData } from '../../utils';
@@ -46,7 +48,11 @@ type DataMaskAction =
   | {
       type: 'filterState';
       extraFormData: ExtraFormData;
-      filterState: { value: SelectValue; label?: string };
+      filterState: {
+        value: SelectValue;
+        label?: string;
+        overridedColumnValue?: string;
+      };
     };
 
 function reducer(draft: DataMask, action: DataMaskAction) {
@@ -131,8 +137,8 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         enableEmptyFilter && !inverseSelection && !values?.length;
 
       const suffix = inverseSelection && values?.length ? t(' (excluded)') : '';
-      dispatchDataMask({
-        type: 'filterState',
+
+      const dataMask = {
         extraFormData: getSelectExtraFormData(
           col,
           values,
@@ -151,7 +157,50 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
               ? undefined
               : values,
         },
-      });
+      };
+
+      const isColumnValueOverrided = !formData.groupby?.includes(
+        filterState.overridedColumnValue,
+      );
+
+      if (filterState.overridedColumnValue && isColumnValueOverrided) {
+        const fd = {
+          ...cloneDeep(formData),
+          groupby: [filterState.overridedColumnValue],
+        };
+
+        if (filterState?.value?.length > 0) {
+          fd.extra_form_data = {
+            filters: [{ col, op: 'IN', val: filterState.value }],
+          };
+        }
+
+        getChartDataRequest({
+          formData: fd,
+          force: true,
+        }).then(({ json }) => {
+          const datas: ChartDataResponseResult['data'] = json.result[0].data;
+          const overridedColumnValues = datas.map(
+            data => Object.values(data)[0],
+          ) as string[];
+
+          dispatchDataMask({
+            ...dataMask,
+            type: 'filterState',
+            extraFormData: getSelectExtraFormData(
+              filterState.overridedColumnValue,
+              overridedColumnValues,
+              emptyFilter,
+              inverseSelection,
+            ),
+          });
+        });
+      } else {
+        dispatchDataMask({
+          ...dataMask,
+          type: 'filterState',
+        });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

@@ -99,6 +99,8 @@ export const nativeFilterTooltips = {
   defaultValue:
     'Default value must be set when "Filter value is required" is checked',
   preFilter: `Add filter clauses to control the filter's source query, though only in the context of the autocomplete i.e., these conditions do not impact how the filter is applied to the dashboard. This is useful when you want to improve the query's performance by only scanning a subset of the underlying data or limit the available values displayed in the filter.`,
+  columnValue:
+    'If value is specified, sorting will be done based on this value. Default value will be column name.',
 };
 
 export const nativeFilterOptions = [
@@ -294,11 +296,13 @@ export function fillNativeFilterForm(
   cy.get(nativeFilters.silentLoading).should('not.exist');
   if (filterColumn) {
     cy.get(nativeFilters.filtersPanel.filterInfoInput)
-      .last()
+      .eq(-2)
       .click({ force: true });
+
     cy.get(nativeFilters.filtersPanel.filterInfoInput)
-      .last()
-      .type(filterColumn);
+      .eq(-2)
+      .type(filterColumn, { force: true });
+
     cy.get(nativeFilters.filtersPanel.inputDropdown)
       .should('be.visible', { timeout: 20000 })
       .last()

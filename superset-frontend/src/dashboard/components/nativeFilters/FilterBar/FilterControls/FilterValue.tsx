@@ -145,6 +145,38 @@ const FilterValue: FC<FilterControlProps> = ({
     if (!inViewFirstTime) {
       return;
     }
+
+    const overridedColumnValue =
+      filter?.targets?.[0].column?.overridedColumnValue;
+
+    const isColumnValueOverrided =
+      overridedColumnValue &&
+      !filter?.dataMask?.filterState?.overridedColumnValue;
+
+    const deleteColumnValueOverride =
+      !overridedColumnValue &&
+      filter?.dataMask?.filterState?.overridedColumnValue;
+
+    if (isColumnValueOverrided) {
+      onFilterSelectionChange(filter, {
+        ...filter.dataMask,
+        filterState: {
+          ...filter?.dataMask?.filterState,
+          overridedColumnValue,
+        },
+      });
+    } else if (deleteColumnValueOverride) {
+      const updatedFilterState = {
+        ...filter?.dataMask?.filterState,
+      };
+      delete updatedFilterState.overridedColumnValue;
+
+      onFilterSelectionChange(filter, {
+        ...filter.dataMask,
+        filterState: updatedFilterState,
+      });
+    }
+
     const newFormData = getFormData({
       ...filter,
       datasetId,

@@ -2600,6 +2600,12 @@ msgstr ""
 msgid "Column"
 msgstr ""
 
+msgid "Column label"
+msgstr ""
+
+msgid "Column value"
+msgstr ""
+
 #, python-format
 msgid ""
 "Column \"%(column)s\" is not numeric or does not exists in the query "
@@ -5338,6 +5344,9 @@ msgid "If Table Already Exists"
 msgstr ""
 
 msgid "If a metric is specified, sorting will be done based on the metric value"
+msgstr ""
+
+msgid "If value is specified, sorting will be done based on this value. Default value will be column name."
 msgstr ""
 
 msgid ""

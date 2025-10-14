@@ -83,7 +83,7 @@ export default function getControlItemsMap({
   > = {};
   const mapMainControlItems: Record<
     string,
-    { element: ReactNode; checked: boolean }
+    { element: ReactNode; elementColumnValue?: ReactNode; checked: boolean }
   > = {};
 
   controlItems
@@ -96,6 +96,10 @@ export default function getControlItemsMap({
         filterToEdit?.controlValues?.[mainControlItem.name] ??
         mainControlItem?.config?.default;
       const initColumn = filterToEdit?.targets[0]?.column?.name;
+
+      // set column value or or nothing to keep default behavior column value = column name
+      const initOverridedColumnValue =
+        filterToEdit?.targets[0]?.column?.overridedColumnValue;
 
       const element = (
         <>
@@ -114,7 +118,7 @@ export default function getControlItemsMap({
             initialValue={initColumn}
             label={
               <StyledLabel>
-                {mainControlItem.config?.label || t('Column')}
+                {mainControlItem.config?.label || t('Column label')}
               </StyledLabel>
             }
             rules={[
@@ -134,7 +138,54 @@ export default function getControlItemsMap({
                 doesColumnMatchFilterType(formFilter?.filterType || '', column)
               }
               onChange={() => {
+                // when value change, we reset column value
+                form.setFieldsValue({
+                  filters: { [filterId]: { overridedColumnValue: undefined } },
+                });
                 // We need reset default value when column changed
+                setNativeFilterFieldValues(form, filterId, {
+                  defaultDataMask: null,
+                });
+                forceUpdate();
+                formChanged();
+              }}
+            />
+          </StyledFormItem>
+        </>
+      );
+
+      const elementColumnValue = (
+        <>
+          <StyledFormItem
+            expanded={expanded}
+            name={['filters', filterId, 'overridedColumnValue']}
+            initialValue={initOverridedColumnValue}
+            label={
+              <StyledLabel>
+                {t('Column value')}
+                &nbsp;
+                <InfoTooltipWithTrigger
+                  placement="top"
+                  tooltip={t(
+                    'If value is specified, sorting will be done based on this value. Default value will be column name.',
+                  )}
+                />
+              </StyledLabel>
+            }
+          >
+            <ColumnSelect
+              mode={mainControlItem.config?.multiple && 'multiple'}
+              form={form}
+              value={initOverridedColumnValue}
+              formField="overridedColumnValue"
+              filterId={filterId}
+              datasetId={datasetId}
+              allowClear
+              filterValues={column =>
+                doesColumnMatchFilterType(formFilter?.filterType || '', column)
+              }
+              onChange={() => {
+                // We need reset default value when column value changed
                 setNativeFilterFieldValues(form, filterId, {
                   defaultDataMask: null,
                 });
@@ -147,6 +198,7 @@ export default function getControlItemsMap({
       );
       mapMainControlItems[mainControlItem.name] = {
         element,
+        elementColumnValue,
         checked: initialValue,
       };
     });

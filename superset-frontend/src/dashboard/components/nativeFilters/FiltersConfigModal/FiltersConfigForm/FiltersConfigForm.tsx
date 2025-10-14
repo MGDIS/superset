@@ -959,6 +959,12 @@ const FiltersConfigForm = (
               )}
           </StyledRowContainer>
         )}
+        <StyledRowContainer>
+          {hasDataset &&
+            Object.keys(mainControlItems).map(
+              key => mainControlItems[key].elementColumnValue,
+            )}
+        </StyledRowContainer>
         <StyledCollapse
           defaultActiveKey={activeFilterPanelKeys}
           onChange={key => {

@@ -21,6 +21,7 @@ import { AdhocFilter, DataMask } from '@superset-ui/core';
 
 export interface NativeFilterColumn {
   name: string;
+  overridedColumnValue?: string;
   displayName?: string;
 }
 
