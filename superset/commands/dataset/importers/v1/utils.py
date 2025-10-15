@@ -195,8 +195,8 @@ def import_dataset(  # noqa: C901
     # Authorized roles to dataset
     dataset.roles.clear()
     if "roles" in original_config:
-        for role in original_config["roles"]:
-            role = security_manager.find_role(role["name"])
+        for role_item in original_config["roles"]:
+            role = security_manager.find_role(role_item["name"])
             dataset.roles.append(role)
 
     return dataset
