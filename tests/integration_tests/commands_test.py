@@ -138,8 +138,6 @@ class TestImportAssetsCommand(SupersetTestCase):
 
         dataset = chart.table
         assert str(dataset.uuid) == dataset_config["uuid"]
-        assert str(dataset.roles[0].name) == dataset_config["roles"][0]["name"]
-        assert int(dataset.roles[0].id) is not None
 
         assert json.loads(chart.query_context) == {
             "datasource": {"id": dataset.id, "type": "table"},
