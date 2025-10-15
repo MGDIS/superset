@@ -2718,10 +2718,10 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
     def has_role_access(self, dataset: "SqlaTable") -> bool:
         """
-        Returns True if the current user has a role authorized on dataset
+        Returns True if the current user has an authorized role on dataset
 
         :param dataset: Dataset to check
-        :returns: Whether the current user has a role authorized on dataset
+        :returns: Whether the current user has access to the dataset
         """
 
         try:
