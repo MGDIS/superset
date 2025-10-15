@@ -566,7 +566,6 @@ def test_import_dataset_without_owner_permission(
 
     database = Database(database_name="my_database", sqlalchemy_uri="sqlite://")
     db.session.add(database)
-    db.session.add(Role(name="Gamma"))
     db.session.flush()
 
     config = copy.deepcopy(dataset_config)
