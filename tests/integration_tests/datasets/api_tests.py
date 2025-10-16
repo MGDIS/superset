@@ -285,6 +285,7 @@ class TestDatasetApi(SupersetTestCase):
             "id",
             "kind",
             "owners",
+            "roles",
             "schema",
             "sql",
             "table_name",

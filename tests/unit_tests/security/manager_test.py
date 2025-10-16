@@ -31,6 +31,7 @@ from superset.connectors.sqla.models import Database, SqlaTable
 from superset.exceptions import SupersetSecurityException
 from superset.extensions import appbuilder
 from superset.models.slice import Slice
+from superset.models.sql_lab import Query
 from superset.security.guest_token import GuestTokenResourceType
 from superset.security.manager import (
     query_context_modified,
@@ -710,6 +711,28 @@ def test_raise_for_access_datasource_role_rbac_disabled(
     with override_user(alice):
         with pytest.raises(SupersetSecurityException):
             sm.raise_for_access(datasource=dataset)
+
+
+def test_has_role_access_resource_without_roles(app_context: None) -> None:
+    """
+    Test that a resource without roles, like a SQL Lab query,
+    does not give access to the user and does not raise an error
+    """
+    sm = SupersetSecurityManager(appbuilder)
+
+    alice = User(
+        first_name="Alice",
+        last_name="Doe",
+        email="alice@example.org",
+        username="alice",
+        roles=[Role(name="my_role")],
+    )
+
+    # A SQL Lab query does not have a roles attribute
+    query = Query(sql="SELECT 1")
+
+    with override_user(alice):
+        assert sm.has_role_access(query) is False
 
 
 def test_query_context_modified(

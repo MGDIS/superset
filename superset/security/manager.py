@@ -2462,7 +2462,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         :raises SupersetSecurityException: If the user cannot access the resource
         """
         # pylint: disable=import-outside-toplevel
-        from superset import is_feature_enabled, security_manager
+        from superset import is_feature_enabled
         from superset.connectors.sqla.models import SqlaTable
         from superset.models.dashboard import Dashboard
         from superset.models.slice import Slice
@@ -2586,9 +2586,6 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
             assert datasource
 
-            user_roles = security_manager.get_user_roles()
-            datasource_roles = set(datasource.roles or [])
-
             if not (
                 self.can_access_schema(datasource)
                 or self.can_access("datasource_access", datasource.perm or "")
@@ -2597,7 +2594,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                     # Grant access to the datasource with the user roles only if
                     # dataset RBAC is enabled.
                     is_feature_enabled("DATASET_RBAC")
-                    and any(role in user_roles for role in datasource_roles)
+                    and self.has_role_access(datasource)
                 )
                 or (
                     # Grant access to the datasource only if dashboard RBAC is enabled
@@ -3156,6 +3153,24 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                     level=ErrorLevel.ERROR,
                 )
             )
+
+    def has_role_access(self, resource: Model) -> bool:
+        """
+        Returns True if the current user has an authorized role on the resource
+
+        :param resource: The dataset, dashboard, etc. resource
+        :returns: Whether the current user has access to the resource
+        """
+
+        try:
+            user_roles = self.get_user_roles()
+
+            # Some resources, like a SQL Lab query, do not have roles.
+            resource_roles = set(getattr(resource, "roles", None) or [])
+
+            return any(role in user_roles for role in resource_roles)
+        except SupersetSecurityException:
+            return False
 
     def is_owner(self, resource: Model) -> bool:
         """
