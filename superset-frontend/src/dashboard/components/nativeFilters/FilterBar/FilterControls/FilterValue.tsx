@@ -146,36 +146,7 @@ const FilterValue: FC<FilterControlProps> = ({
       return;
     }
 
-    const overridedColumnValue =
-      filter?.targets?.[0].column?.overridedColumnValue;
-
-    const isColumnValueOverrided =
-      overridedColumnValue &&
-      !filter?.dataMask?.filterState?.overridedColumnValue;
-
-    const deleteColumnValueOverride =
-      !overridedColumnValue &&
-      filter?.dataMask?.filterState?.overridedColumnValue;
-
-    if (isColumnValueOverrided) {
-      onFilterSelectionChange(filter, {
-        ...filter.dataMask,
-        filterState: {
-          ...filter?.dataMask?.filterState,
-          overridedColumnValue,
-        },
-      });
-    } else if (deleteColumnValueOverride) {
-      const updatedFilterState = {
-        ...filter?.dataMask?.filterState,
-      };
-      delete updatedFilterState.overridedColumnValue;
-
-      onFilterSelectionChange(filter, {
-        ...filter.dataMask,
-        filterState: updatedFilterState,
-      });
-    }
+    const columnValue = filter?.targets?.[0].column?.columnValue;
 
     const newFormData = getFormData({
       ...filter,
@@ -185,7 +156,17 @@ const FilterValue: FC<FilterControlProps> = ({
       adhoc_filters,
       time_range,
       dashboardId,
+      columnValue,
     });
+
+    const deleteColumnValueOverride = !columnValue && formData.columnValue;
+
+    if (deleteColumnValueOverride) {
+      delete newFormData.columnValue;
+
+      setFormData(newFormData);
+    }
+
     const filterOwnState = filter.dataMask?.ownState || {};
     // TODO: We should try to improve our useEffect hooks to depend more on
     // granular information instead of big objects that require deep comparison.

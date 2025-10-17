@@ -123,7 +123,7 @@ export const createHandleSave =
       if (formInputs.dataset && formInputs.column) {
         target.column = {
           name: formInputs.column,
-          overridedColumnValue: formInputs.overridedColumnValue,
+          columnValue: formInputs.columnValue,
         };
       }
 

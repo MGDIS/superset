@@ -293,13 +293,13 @@ describe('Native filters', () => {
 
     it('Verify setting options and tooltips for value filter', () => {
       enterNativeFilterEditModal(false);
-      cy.contains('Filter value is required').should('be.visible').click();
       checkNativeFilterTooltip(0, nativeFilterTooltips.columnValue);
       checkNativeFilterTooltip(1, nativeFilterTooltips.preFilter);
+      cy.contains('Filter value is required').should('be.visible').click();
       checkNativeFilterTooltip(2, nativeFilterTooltips.defaultValue);
       cy.get(nativeFilters.modal.container).should('be.visible');
       valueNativeFilterOptions.forEach(el => {
-        cy.contains(el);
+        cy.contains(el).scrollIntoView();
       });
       cy.contains('Values are dependent on other filters').should('not.exist');
       cy.get(

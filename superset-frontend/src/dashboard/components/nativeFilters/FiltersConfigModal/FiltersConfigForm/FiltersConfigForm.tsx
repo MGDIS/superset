@@ -199,6 +199,10 @@ export const StyledLabel = styled.span`
   font-size: ${({ theme }) => theme.typography.sizes.s}px;
 `;
 
+export const StyledLabelWithHelpText = styled.span`
+  margin-bottom: 4px;
+`;
+
 const CleanFormItem = styled(FormItem)`
   margin-bottom: 0;
 `;
