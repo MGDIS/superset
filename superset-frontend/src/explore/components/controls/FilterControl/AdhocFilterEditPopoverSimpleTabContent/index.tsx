@@ -532,6 +532,7 @@ const AdhocFilterEditPopoverSimpleTabContent: FC<Props> = props => {
           ('column_name' in column && column.column_name) ||
           ('optionName' in column && column.optionName) ||
           '',
+        verbose_name: 'verbose_name' in column && column.verbose_name,
         key:
           ('id' in column && column.id) ||
           ('optionName' in column && column.optionName) ||
