@@ -38,6 +38,7 @@ export interface NativeFiltersFormItem {
     label: string | ReactNode;
   };
   column: string;
+  columnValue?: string;
   controlValues: {
     [key: string]: any;
   };

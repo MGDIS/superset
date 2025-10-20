@@ -98,7 +98,10 @@ function buildFilterTarget(
   }
 
   if (formInputs.dataset && formInputs.column) {
-    target.column = { name: formInputs.column };
+    target.column = {
+      name: formInputs.column,
+      columnValue: formInputs.columnValue,
+    };
   }
 
   return target;

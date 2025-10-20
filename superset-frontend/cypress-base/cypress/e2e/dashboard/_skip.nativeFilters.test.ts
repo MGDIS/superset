@@ -403,6 +403,8 @@ describe('Native filters', () => {
 
     it('Verify setting options and tooltips for value filter', () => {
       enterNativeFilterEditModal(false);
+      checkNativeFilterTooltip(0, nativeFilterTooltips.columnValue);
+      checkNativeFilterTooltip(1, nativeFilterTooltips.preFilter);
       cy.contains('Filter value is required').scrollIntoView();
       cy.get('body').trigger('mousemove', { clientX: 0, clientY: 0 });
       cy.wait(300);
@@ -410,20 +412,19 @@ describe('Native filters', () => {
       cy.contains('Filter value is required').should('be.visible').click({
         force: true,
       });
-      checkNativeFilterTooltip(0, nativeFilterTooltips.preFilter);
-      checkNativeFilterTooltip(1, nativeFilterTooltips.defaultValue);
+      checkNativeFilterTooltip(2, nativeFilterTooltips.defaultValue);
       cy.get(nativeFilters.modal.container).should('be.visible');
       valueNativeFilterOptions.forEach(el => {
-        cy.contains(el);
+        cy.contains(el).scrollIntoView();
       });
       cy.contains('Values are dependent on other filters').should('not.exist');
       cy.get(
         nativeFilters.filterConfigurationSections.checkedCheckbox,
       ).contains('Can select multiple values');
-      checkNativeFilterTooltip(2, nativeFilterTooltips.required);
-      checkNativeFilterTooltip(3, nativeFilterTooltips.defaultToFirstItem);
-      checkNativeFilterTooltip(4, nativeFilterTooltips.searchAllFilterOptions);
-      checkNativeFilterTooltip(5, nativeFilterTooltips.inverseSelection);
+      checkNativeFilterTooltip(3, nativeFilterTooltips.required);
+      checkNativeFilterTooltip(4, nativeFilterTooltips.defaultToFirstItem);
+      checkNativeFilterTooltip(5, nativeFilterTooltips.searchAllFilterOptions);
+      checkNativeFilterTooltip(6, nativeFilterTooltips.inverseSelection);
       clickOnAddFilterInModal();
       cy.contains('Values are dependent on other filters').should('exist');
     });

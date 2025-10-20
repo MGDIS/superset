@@ -103,6 +103,8 @@ export const nativeFilterTooltips = {
   defaultValue:
     'Default value must be set when "Filter value is required" is checked',
   preFilter: `Add filter clauses to control the filter's source query, though only in the context of the autocomplete i.e., these conditions do not impact how the filter is applied to the dashboard. This is useful when you want to improve the query's performance by only scanning a subset of the underlying data or limit the available values displayed in the filter.`,
+  columnValue:
+    'If value is specified, filtering will be done based on this value. Default value will be column name.',
 };
 
 export const nativeFilterOptions = [
@@ -301,11 +303,13 @@ export function fillNativeFilterForm(
   }
 
   if (filterColumn) {
-    cy.get('div[aria-label="Column select"]').within(() => {
-      cy.get('input').then($input => {
-        setSelectSearchInput($input, filterColumn, true);
+    cy.get('div[aria-label="Column select"]')
+      .first()
+      .within(() => {
+        cy.get('input').then($input => {
+          setSelectSearchInput($input, filterColumn, true);
+        });
       });
-    });
   }
 }
 

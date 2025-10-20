@@ -177,6 +177,9 @@ const FilterValue: FC<FilterValueProps> = ({
     if (!inViewFirstTime) {
       return;
     }
+
+    const columnValue = filter?.targets?.[0].column?.columnValue;
+
     const newFormData = getFormData({
       ...filter,
       datasetId,
@@ -186,7 +189,9 @@ const FilterValue: FC<FilterValueProps> = ({
       time_range: timeRange,
       granularity_sqla: granularitySqla,
       dashboardId,
+      columnValue,
     });
+
     const filterOwnState = filter.dataMask?.ownState || {};
     if (transitiveParentIds.length) {
       // Prevent unnecessary backend requests by validating ancestor filter

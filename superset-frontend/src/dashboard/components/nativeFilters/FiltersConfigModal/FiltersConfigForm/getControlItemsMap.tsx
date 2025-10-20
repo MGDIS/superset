@@ -87,7 +87,7 @@ export default function getControlItemsMap({
   > = {};
   const mapMainControlItems: Record<
     string,
-    { element: ReactNode; checked: boolean }
+    { element: ReactNode; elementColumnValue?: ReactNode; checked: boolean }
   > = {};
 
   controlItems
@@ -103,6 +103,9 @@ export default function getControlItemsMap({
       const initColumn =
         customizationToEdit?.targets?.[0]?.column?.name ??
         filterToEdit?.targets?.[0]?.column?.name;
+
+      // set column value or nothing for keep default behavior column value = column name
+      const initColumnValue = filterToEdit?.targets[0]?.column?.columnValue;
 
       const element = (
         <>
@@ -121,7 +124,7 @@ export default function getControlItemsMap({
             initialValue={initColumn}
             label={
               <StyledLabel>
-                {mainControlItem.config?.label || t('Column')}
+                {mainControlItem.config?.label || t('Column for labels')}
               </StyledLabel>
             }
             rules={[
@@ -130,6 +133,9 @@ export default function getControlItemsMap({
                 message: t('Column is required'),
               },
             ]}
+            extra={t(
+              "Column used for labels and values or only labels if a value is defined on 'Column for values'",
+            )}
             data-test="field-input"
           >
             <ColumnSelect
@@ -144,7 +150,53 @@ export default function getControlItemsMap({
                 ) && !!column?.filterable
               }
               onChange={() => {
+                // when value change, we reset column value
+                form.setFieldsValue({
+                  filters: { [filterId]: { columnValue: undefined } },
+                });
                 // We need reset default value when column changed
+                setNativeFilterFieldValues(form, filterId, {
+                  defaultDataMask: null,
+                });
+                forceUpdate();
+                formChanged();
+              }}
+            />
+          </StyledFormItem>
+        </>
+      );
+
+      const elementColumnValue = (
+        <>
+          <StyledFormItem
+            expanded={expanded}
+            name={['filters', filterId, 'columnValue']}
+            initialValue={initColumnValue}
+            label={
+              <StyledLabel>
+                {t('Column for values')}
+                &nbsp;
+                <InfoTooltip
+                  placement="top"
+                  tooltip={t(
+                    'If value is specified, filtering will be done based on this value. Default value will be column name.',
+                  )}
+                />
+              </StyledLabel>
+            }
+          >
+            <ColumnSelect
+              mode={mainControlItem.config?.multiple && 'multiple'}
+              form={form}
+              formField="columnValue"
+              filterId={filterId}
+              datasetId={datasetId}
+              allowClear
+              filterValues={column =>
+                doesColumnMatchFilterType(formFilter?.filterType || '', column)
+              }
+              onChange={() => {
+                // We need reset default value when column value changed
                 setNativeFilterFieldValues(form, filterId, {
                   defaultDataMask: null,
                 });
@@ -157,6 +209,7 @@ export default function getControlItemsMap({
       );
       mapMainControlItems[mainControlItem.name] = {
         element,
+        elementColumnValue,
         checked: initialValue,
       };
     });

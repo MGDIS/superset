@@ -18,12 +18,14 @@
  */
 import { AppSection } from '@superset-ui/core';
 import {
+  act,
   render,
   screen,
   userEvent,
   waitFor,
 } from 'spec/helpers/testing-library';
 import { NULL_STRING } from 'src/utils/common';
+import * as chartAction from 'src/components/Chart/chartAction';
 import SelectFilterPlugin from './SelectFilterPlugin';
 import transformProps from './transformProps';
 
@@ -1248,4 +1250,111 @@ test('resets dependent filter to first item when value does not exist in data', 
       }),
     );
   });
+});
+
+const renderWithColumnValue = (
+  formData: Record<string, unknown>,
+  filterState: Record<string, unknown>,
+) => {
+  const getChartDataRequest = jest
+    .spyOn(chartAction, 'getChartDataRequest')
+    .mockResolvedValue({
+      json: { result: [{ data: [{ gender_id: 2 }] }] },
+    } as unknown as Awaited<
+      ReturnType<typeof chartAction.getChartDataRequest>
+    >);
+  const setDataMaskMock = jest.fn();
+  render(
+    // @ts-expect-error
+    <SelectFilterPlugin
+      // @ts-expect-error
+      {...transformProps({
+        ...selectMultipleProps,
+        formData: {
+          ...selectMultipleProps.formData,
+          defaultValue: undefined,
+          columnValue: 'gender_id',
+          ...formData,
+        },
+        filterState,
+      })}
+      setDataMask={setDataMaskMock}
+      showOverflow={false}
+    />,
+    {
+      useRedux: true,
+      initialState: {
+        nativeFilters: { filters: { 'test-filter': { name: 'Test Filter' } } },
+        dataMask: {},
+      },
+    },
+  );
+  return { getChartDataRequest, setDataMaskMock };
+};
+
+test('filters on the column for values with the new selection', async () => {
+  const { getChartDataRequest, setDataMaskMock } = renderWithColumnValue(
+    {},
+    {},
+  );
+
+  userEvent.click(screen.getAllByRole('combobox')[0]);
+  userEvent.click(await screen.findByTitle('girl'));
+
+  await waitFor(() =>
+    expect(getChartDataRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        formData: expect.objectContaining({
+          groupby: ['gender_id'],
+          extra_form_data: {
+            filters: [{ col: 'gender', op: 'IN', val: ['girl'] }],
+          },
+        }),
+      }),
+    ),
+  );
+  await waitFor(() =>
+    expect(setDataMaskMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        extraFormData: {
+          filters: [{ col: 'gender_id', op: 'IN', val: [2] }],
+        },
+      }),
+    ),
+  );
+  getChartDataRequest.mockRestore();
+});
+
+test('filters on the column for values when the exclusion changes', async () => {
+  const { getChartDataRequest, setDataMaskMock } = renderWithColumnValue(
+    { inverseSelection: true },
+    { value: ['girl'], excludeFilterValues: true },
+  );
+
+  // The lookup resolves outside of a user event, so wait for it in act().
+  // Other tests of this file change the timer mode, and an update outside
+  // of act() can then stay pending.
+  await act(() => getChartDataRequest.mock.results[0].value);
+  expect(setDataMaskMock).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      extraFormData: {
+        filters: [{ col: 'gender_id', op: 'NOT IN', val: [2] }],
+      },
+    }),
+  );
+
+  userEvent.click(screen.getAllByRole('combobox')[0]);
+  userEvent.click(await screen.findByTitle('is'));
+
+  await act(() => getChartDataRequest.mock.results[1].value);
+  await waitFor(() =>
+    expect(setDataMaskMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        extraFormData: {
+          filters: [{ col: 'gender_id', op: 'IN', val: [2] }],
+        },
+      }),
+    ),
+  );
+  getChartDataRequest.mockRestore();
 });

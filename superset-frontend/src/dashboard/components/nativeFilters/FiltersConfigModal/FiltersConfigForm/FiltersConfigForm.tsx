@@ -1030,6 +1030,13 @@ const FiltersConfigForm = (
                       )}
                   </StyledRowContainer>
                 )}
+                <StyledRowContainer>
+                  {hasDataset &&
+                    !isChartCustomization &&
+                    Object.keys(mainControlItems).map(
+                      key => mainControlItems[key].elementColumnValue,
+                    )}
+                </StyledRowContainer>
                 <Collapse
                   modalMode
                   defaultActiveKey={activeFilterPanelKeys}

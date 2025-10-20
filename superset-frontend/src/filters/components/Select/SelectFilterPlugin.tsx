@@ -27,11 +27,12 @@ import {
   getColumnLabel,
   JsonObject,
   finestTemporalGrainFormatter,
+  ChartDataResponseResult,
 } from '@superset-ui/core';
 import { tn } from '@apache-superset/core/translation';
 import { styled } from '@apache-superset/core/theme';
 import { GenericDataType } from '@apache-superset/core/common';
-import { debounce, isUndefined } from 'lodash';
+import { debounce, isUndefined, cloneDeep } from 'lodash';
 import { useImmerReducer } from 'use-immer';
 import {
   FormItem,
@@ -45,6 +46,7 @@ import {
   propertyComparator,
 } from '@superset-ui/core/components/Select/utils';
 import { FilterBarOrientation } from 'src/dashboard/types';
+import { getChartDataRequest } from 'src/components/Chart/chartAction';
 import { getDataRecordFormatter, getSelectExtraFormData } from '../../utils';
 import { FilterPluginStyle, StatusMessage } from '../common';
 import { PluginFilterSelectProps, SelectValue } from './types';
@@ -149,6 +151,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
     [formData.groupby],
   );
   const [col] = groupby;
+  const { columnValue } = formData;
   const [initialColtypeMap] = useState(coltypeMap);
   const [search, setSearch] = useState('');
   const prevDataRef = useRef(data);
@@ -200,8 +203,8 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         enableEmptyFilter && !inverseSelection && !values?.length;
 
       const suffix = inverseSelection && values?.length ? t(' (excluded)') : '';
-      dispatchDataMask({
-        type: 'filterState',
+
+      const dataMask = {
         extraFormData: getSelectExtraFormData(
           col,
           values,
@@ -221,12 +224,54 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
               : values,
           excludeFilterValues,
         },
-      });
+      };
+
+      // When columnValue differs from col, the filter applies to columnValue.
+      // An extra request gets the columnValue values of the selected labels.
+      const filterByColumnValue =
+        columnValue && col !== columnValue && values?.length;
+
+      if (filterByColumnValue) {
+        const fd = {
+          ...cloneDeep(formData),
+          groupby: [columnValue],
+          extra_form_data: {
+            filters: [{ col, op: 'IN' as const, val: values }],
+          },
+        };
+
+        getChartDataRequest({
+          formData: fd,
+          force: true,
+        }).then(({ json }) => {
+          const datas: ChartDataResponseResult['data'] = json.result[0].data;
+          const columnValues = datas.map(
+            data => Object.values(data)[0],
+          ) as string[];
+
+          dispatchDataMask({
+            ...dataMask,
+            type: 'filterState',
+            extraFormData: getSelectExtraFormData(
+              columnValue,
+              columnValues,
+              emptyFilter,
+              excludeFilterValues && inverseSelection,
+            ),
+          });
+        });
+      } else {
+        dispatchDataMask({
+          ...dataMask,
+          type: 'filterState',
+        });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       appSection,
       col,
+      columnValue,
       datatype,
       defaultToFirstItem,
       dispatchDataMask,
@@ -458,23 +503,28 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
 
   useEffect(() => {
     if (prevExcludeFilterValues.current !== excludeFilterValues) {
-      dispatchDataMask({
-        type: 'filterState',
-        extraFormData: getSelectExtraFormData(
-          col,
-          filterState.value,
-          !filterState.value?.length,
-          excludeFilterValues && inverseSelection,
-        ),
-        filterState: {
-          ...(filterState as {
-            value: SelectValue;
-            label?: string;
-            excludeFilterValues?: boolean;
-          }),
-          excludeFilterValues,
-        },
-      });
+      // updateDataMask gets the values of columnValue before it builds the filter
+      if (columnValue && col !== columnValue) {
+        updateDataMask(filterState.value);
+      } else {
+        dispatchDataMask({
+          type: 'filterState',
+          extraFormData: getSelectExtraFormData(
+            col,
+            filterState.value,
+            !filterState.value?.length,
+            excludeFilterValues && inverseSelection,
+          ),
+          filterState: {
+            ...(filterState as {
+              value: SelectValue;
+              label?: string;
+              excludeFilterValues?: boolean;
+            }),
+            excludeFilterValues,
+          },
+        });
+      }
       prevExcludeFilterValues.current = excludeFilterValues;
     }
   }, [excludeFilterValues]);

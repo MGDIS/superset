@@ -3487,6 +3487,15 @@ msgstr "Couleur"
 msgid "Column"
 msgstr "Colonne"
 
+msgid "Column for labels"
+msgstr "Colonne pour les libellés"
+
+msgid "Column for values"
+msgstr "Colonne pour les valeurs"
+
+msgid "Column used for labels and values or only labels if a value is defined on 'Column for values'"
+msgstr "Colonne utilisée pour les libellés et valeurs ou seulement les libellés si une valeur est définie dans 'Colonne pour les valeurs'"
+
 #, python-format
 msgid ""
 "Column \"%(column)s\" is not numeric or does not exists in the query "
@@ -7384,6 +7393,9 @@ msgstr ""
 
 msgid "If a metric is specified, sorting will be done based on the metric value"
 msgstr "Si une mesure est définie, le tri sera basé sur sa valeur"
+
+msgid "If value is specified, filtering will be done based on this value. Default value will be column name."
+msgstr "Si une valeur est spécifiée, le filtrage sera basé sur cette valeur. Par défaut, la valeur sera le nom de la colonne."
 
 msgid ""
 "If enabled, this control sorts the results/values descending, otherwise "

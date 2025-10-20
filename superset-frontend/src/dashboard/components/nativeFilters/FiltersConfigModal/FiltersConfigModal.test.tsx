@@ -37,6 +37,7 @@ import {
   TimeFilterPlugin,
   TimeGrainFilterPlugin,
 } from 'src/filters/components';
+import { supersetGetCache } from 'src/utils/cachedSupersetGet';
 import FiltersConfigModal, {
   FiltersConfigModalProps,
 } from './FiltersConfigModal';
@@ -161,6 +162,8 @@ const FILTER_TYPE_REGEX = /^filter type$/i;
 const FILTER_NAME_REGEX = /^filter name$/i;
 const DATASET_REGEX = /^dataset$/i;
 const COLUMN_REGEX = /^column$/i;
+const COLUMN_LABEL_REGEX = /^column for labels$/i;
+const COLUMN_VALUE_REGEX = /^column for values$/i;
 const VALUE_REGEX = /^value$/i;
 const NUMERICAL_RANGE_REGEX = /^numerical range$/i;
 const TIME_RANGE_REGEX = /^time range$/i;
@@ -233,7 +236,8 @@ test('renders a value filter type', () => {
   expect(screen.getByText(FILTER_TYPE_REGEX)).toBeInTheDocument();
   expect(screen.getByText(FILTER_NAME_REGEX)).toBeInTheDocument();
   expect(screen.getByText(DATASET_REGEX)).toBeInTheDocument();
-  expect(screen.getByText(COLUMN_REGEX)).toBeInTheDocument();
+  expect(screen.getByText(COLUMN_LABEL_REGEX)).toBeInTheDocument();
+  expect(screen.getByText(COLUMN_VALUE_REGEX)).toBeInTheDocument();
 
   expect(getCheckbox(DEFAULT_VALUE_REGEX)).not.toBeChecked();
   expect(getCheckbox(FILTER_REQUIRED_REGEX)).not.toBeChecked();
@@ -743,6 +747,68 @@ test('modifies the name of a filter', async () => {
         filterChanges: expect.objectContaining({
           modified: expect.arrayContaining([
             expect.objectContaining({ name: 'New Filter Name' }),
+          ]),
+        }),
+      }),
+    ),
+  );
+}, 30000);
+
+test('saves the column for values of a filter', async () => {
+  // Remove the dataset responses that the previous tests put in the cache.
+  supersetGetCache.clear();
+
+  // Register the dataset columns before the generic dataset routes,
+  // because fetch-mock uses the first route that matches.
+  fetchMock.removeRoutes();
+  fetchMock.get('glob:*/api/v1/dataset/1?q=*', {
+    result: {
+      id: 1,
+      table_name: 'birth_names',
+      database: { id: 1, database_name: 'examples' },
+      metrics: [],
+      columns: [
+        { column_name: 'state', filterable: true },
+        { column_name: 'code', filterable: true },
+      ],
+    },
+  });
+  setupFetchMocks();
+
+  const state = {
+    ...defaultState(),
+    dashboardInfo: {
+      metadata: {
+        native_filter_configuration: [
+          buildNativeFilter('NATIVE_FILTER-1', 'state', []),
+        ],
+      },
+    },
+    dashboardLayout,
+  };
+  const onSave = jest.fn();
+  defaultRender(state, { ...props, createNewOnOpen: false, onSave });
+
+  const getColumnValueSelect = async () =>
+    (await screen.findAllByRole('combobox', { name: 'Column select' }))[1];
+  await userEvent.click(await getColumnValueSelect());
+  await userEvent.type(await getColumnValueSelect(), 'code');
+  await userEvent.click(await screen.findByTitle('code'));
+  await userEvent.click(screen.getByRole('button', { name: SAVE_REGEX }));
+
+  await waitFor(() =>
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterChanges: expect.objectContaining({
+          modified: expect.arrayContaining([
+            expect.objectContaining({
+              targets: [
+                {
+                  datasetId: 1,
+                  column: { name: 'state', columnValue: 'code' },
+                },
+              ],
+            }),
           ]),
         }),
       }),

@@ -26,6 +26,7 @@ export interface ColumnOption {
 
 export interface NativeFilterColumn {
   name: string;
+  columnValue?: string;
   displayName?: string;
 }
 

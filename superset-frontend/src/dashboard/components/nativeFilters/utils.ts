@@ -58,6 +58,7 @@ export const getFormData = ({
   type,
   dashboardId,
   id,
+  columnValue = '',
 }: (Partial<Filter> | Partial<ChartCustomization>) & {
   dashboardId: number;
   datasetId?: number;
@@ -67,11 +68,13 @@ export const getFormData = ({
   time_range?: string;
   sortMetric?: string | null;
   granularity_sqla?: string;
+  columnValue?: string;
 }): Partial<QueryFormData> => {
   const otherProps: {
     datasource?: string;
     groupby?: string[];
     sortMetric?: string;
+    columnValue?: string;
   } = {};
   if (datasetId) {
     otherProps.datasource = `${datasetId}__table`;
@@ -81,6 +84,10 @@ export const getFormData = ({
   }
   if (sortMetric) {
     otherProps.sortMetric = sortMetric;
+  }
+
+  if (columnValue) {
+    otherProps.columnValue = columnValue;
   }
 
   const vizType = filterType;
