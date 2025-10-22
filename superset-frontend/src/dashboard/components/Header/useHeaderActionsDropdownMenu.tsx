@@ -27,9 +27,7 @@ import { URL_PARAMS } from 'src/constants';
 import { useShareMenuItems } from 'src/dashboard/components/menu/ShareMenuItems';
 import { useDownloadMenuItems } from 'src/dashboard/components/menu/DownloadMenuItems';
 import { useHeaderReportMenuItems } from 'src/features/reports/ReportModal/HeaderReportDropdown';
-import SaveModal from 'src/dashboard/components/SaveModal';
 import injectCustomCss from 'src/dashboard/util/injectCustomCss';
-import { SAVE_TYPE_NEWDASHBOARD } from 'src/dashboard/util/constants';
 import FilterScopeModal from 'src/dashboard/components/filterscope/FilterScopeModal';
 import getDashboardUrl from 'src/dashboard/util/getDashboardUrl';
 import { getActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
@@ -42,20 +40,11 @@ export const useHeaderActionsMenu = ({
   dashboardId,
   dashboardInfo,
   refreshFrequency,
-  shouldPersistRefreshFrequency,
   editMode,
-  colorNamespace,
-  colorScheme,
-  layout,
-  expandedSlices,
-  onSave,
-  userCanEdit,
   userCanShare,
-  userCanSave,
   userCanCurate,
   userCanExport,
   isLoading,
-  lastModifiedTime,
   addSuccessToast,
   addDangerToast,
   forceRefreshAllCharts,
@@ -233,36 +222,6 @@ export const useHeaderActionsMenu = ({
     // Divider
     menuItems.push({ type: 'divider' });
 
-    // Save as
-    if (userCanSave) {
-      menuItems.push(
-        createModalMenuItem(
-          MenuKeys.SaveModal,
-          <SaveModal
-            addSuccessToast={addSuccessToast}
-            addDangerToast={addDangerToast}
-            dashboardId={dashboardId}
-            dashboardTitle={dashboardTitle ?? ''}
-            dashboardInfo={dashboardInfo}
-            saveType={SAVE_TYPE_NEWDASHBOARD}
-            layout={layout}
-            expandedSlices={expandedSlices ?? {}}
-            refreshFrequency={refreshFrequency}
-            shouldPersistRefreshFrequency={shouldPersistRefreshFrequency}
-            lastModifiedTime={lastModifiedTime}
-            customCss={customCss ?? ''}
-            colorNamespace={colorNamespace}
-            colorScheme={colorScheme}
-            onSave={onSave}
-            triggerNode={
-              <div data-test="save-as-menu-item">{t('Save as')}</div>
-            }
-            canOverwrite={userCanEdit ?? false}
-          />,
-        ),
-      );
-    }
-
     // Download submenu
     menuItems.push(downloadMenuItem);
 
@@ -314,29 +273,15 @@ export const useHeaderActionsMenu = ({
       />
     );
   }, [
-    addDangerToast,
-    addSuccessToast,
-    colorNamespace,
-    colorScheme,
-    customCss,
-    dashboardId,
     dashboardInfo,
-    dashboardTitle,
     downloadMenuItem,
     editMode,
-    expandedSlices,
     handleMenuClick,
     isLoading,
-    lastModifiedTime,
-    layout,
-    onSave,
     refreshFrequency,
     reportMenuItem,
     shareMenuItems,
-    shouldPersistRefreshFrequency,
     userCanCurate,
-    userCanEdit,
-    userCanSave,
     userCanShare,
   ]);
 

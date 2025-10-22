@@ -750,6 +750,30 @@ test('should render MetadataBar when not in edit mode and not embedded', () => {
   ).toBeInTheDocument();
 });
 
+test('should render the "Save as" menu item when user can save', async () => {
+  const state = {
+    dashboardInfo: {
+      ...initialState.dashboardInfo,
+      userId: '123',
+      dash_save_perm: true,
+    },
+  };
+  setup(state);
+  expect(screen.getByText('Save as')).toBeInTheDocument();
+});
+
+test('should NOT render the "Save as" menu item when user cannot save', async () => {
+  const state = {
+    dashboardInfo: {
+      ...initialState.dashboardInfo,
+      userId: '123',
+      dash_save_perm: false,
+    },
+  };
+  setup(state);
+  expect(screen.queryByText('Save as')).not.toBeInTheDocument();
+});
+
 test('should show UnsavedChangesModal when there are unsaved changes and user tries to navigate', async () => {
   (useUnsavedChangesPrompt as jest.Mock).mockReturnValue({
     showModal: true,

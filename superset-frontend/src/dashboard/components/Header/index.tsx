@@ -52,6 +52,7 @@ import {
   SAVE_TYPE_OVERWRITE,
   DASHBOARD_POSITION_DATA_LIMIT,
   DASHBOARD_HEADER_ID,
+  SAVE_TYPE_NEWDASHBOARD,
 } from 'src/dashboard/util/constants';
 import { TagType, TagTypeEnum } from 'src/components/Tag/TagType';
 import ReportModal from 'src/features/reports/ReportModal';
@@ -61,6 +62,7 @@ import {
 } from 'src/features/reports/ReportModal/actions';
 import { PageHeaderWithActions } from '@superset-ui/core/components/PageHeaderWithActions';
 import { useUnsavedChangesPrompt } from 'src/hooks/useUnsavedChangesPrompt';
+import SaveModal from 'src/dashboard/components/SaveModal';
 import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
 import {
@@ -175,6 +177,11 @@ const actionButtonsStyle = (theme: SupersetTheme) => css`
     display: flex;
     margin-right: ${theme.sizeUnit * 2}px;
   }
+`;
+
+const actionButtonsContainerStyle = (theme: SupersetTheme) => css`
+  display: flex;
+  gap: ${theme.sizeUnit * 2}px;
 `;
 
 const StyledUndoRedoButton = styled(Button)`
@@ -665,9 +672,54 @@ const Header = (): JSX.Element => {
     ],
   );
 
+  const saveAsModal = useMemo(
+    () => (
+      <SaveModal
+        addSuccessToast={boundActionCreators.addSuccessToast}
+        addDangerToast={boundActionCreators.addDangerToast}
+        dashboardId={dashboardInfo.id}
+        dashboardTitle={dashboardTitle}
+        dashboardInfo={dashboardInfo}
+        saveType={SAVE_TYPE_NEWDASHBOARD}
+        layout={layout}
+        expandedSlices={expandedSlices}
+        refreshFrequency={refreshFrequency}
+        shouldPersistRefreshFrequency={shouldPersistRefreshFrequency}
+        lastModifiedTime={actualLastModifiedTime}
+        customCss={customCss}
+        colorNamespace={colorNamespace}
+        colorScheme={colorScheme}
+        onSave={boundActionCreators.onSave}
+        triggerNode={
+          <Button buttonStyle="primary" data-test="save-as">
+            <Icons.SaveOutlined iconSize="l" />
+            {t('Save as')}
+          </Button>
+        }
+        canOverwrite={!!userCanEdit}
+      />
+    ),
+    [
+      actualLastModifiedTime,
+      boundActionCreators.addDangerToast,
+      boundActionCreators.addSuccessToast,
+      boundActionCreators.onSave,
+      colorNamespace,
+      colorScheme,
+      customCss,
+      dashboardInfo,
+      dashboardTitle,
+      expandedSlices,
+      layout,
+      refreshFrequency,
+      shouldPersistRefreshFrequency,
+      userCanEdit,
+    ],
+  );
+
   const rightPanelAdditionalItems = useMemo(
     () => (
-      <div className="button-container">
+      <div css={actionButtonsContainerStyle} className="button-container">
         {userCanSaveAs && (
           <div className="button-container" data-test="dashboard-edit-actions">
             {editMode && (
@@ -763,6 +815,7 @@ const Header = (): JSX.Element => {
             )}
           </div>
         )}
+        <div className="button-container">{userCanSaveAs && saveAsModal}</div>
       </div>
     ),
     [
@@ -778,6 +831,7 @@ const Header = (): JSX.Element => {
       hasUnsavedChanges,
       overwriteDashboard,
       redoLength,
+      saveAsModal,
       undoLength,
       userCanEdit,
       userCanSaveAs,
