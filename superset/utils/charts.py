@@ -14,36 +14,20 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from superset import db, security_manager
-from superset.connectors.sqla.models import SqlaTable, sqlatable_roles, sqlatable_user
-from superset.utils.core import QueryObjectFilterClause, get_user_id
+from superset import db
+from superset.models.slice import Slice, slice_user
+from superset.utils.core import get_user_id, QueryObjectFilterClause
 
-def get_datasets_authorized_for_user_roles() -> list[QueryObjectFilterClause]:
+
+def get_charts_authorized_for_owners() -> list[QueryObjectFilterClause]:
     """
-    Function that returns the list of datasets authorized by the user's roles
+    Function that returns the list of charts where current user is owner
     """
     return (
-        db.session.query(sqlatable_roles.c.table_id)
+        db.session.query(slice_user.c.slice_id)
         .join(
-            SqlaTable,
-            SqlaTable.id == sqlatable_roles.c.table_id,
+            Slice,
+            Slice.id == slice_user.c.slice_id,
         )
-        .filter(
-            sqlatable_roles.c.role_id.in_(
-                [x.id for x in security_manager.get_user_roles()]
-            ),
-        )
-    )
-
-def get_datasets_authorized_for_owners() -> list[QueryObjectFilterClause]:
-    """
-    Function that returns the list of datasets authorized for the owners
-    """
-    return (
-        db.session.query(sqlatable_user.c.table_id)
-        .join(
-            SqlaTable,
-            SqlaTable.id == sqlatable_user.c.table_id,
-        )
-        .filter(sqlatable_user.c.user_id == get_user_id())
+        .filter(slice_user.c.user_id == get_user_id())
     )
