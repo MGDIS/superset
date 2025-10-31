@@ -129,6 +129,7 @@ const mockedProps = {
     permissions: {},
     roles: {
       sql_lab: [['can_read', 'SavedQuery']],
+      Alpha: [['can_write', 'Chart']],
     },
   },
 };
@@ -137,7 +138,9 @@ const mockedPropsWithoutSqlRole = {
   ...mockedProps,
   user: {
     ...mockedProps.user,
-    roles: {},
+    roles: {
+      Alpha: [['can_write', 'Chart']],
+    },
   },
 };
 
