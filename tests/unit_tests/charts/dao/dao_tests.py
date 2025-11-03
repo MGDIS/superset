@@ -21,6 +21,7 @@ import pytest
 from sqlalchemy.orm.session import Session
 
 from superset.utils.core import DatasourceType
+from tests.unit_tests.conftest import with_feature_flags
 
 
 @pytest.fixture
@@ -96,3 +97,46 @@ def test_remove_favorite(session: Session) -> None:
 
     ChartDAO.remove_favorite(chart)
     assert len(ChartDAO.favorited_ids([chart])) == 0
+
+
+@with_feature_flags(DATASET_RBAC=True)
+def test_find_all_returns_owned_charts(session: Session) -> None:
+    from flask_appbuilder.security.sqla.models import User
+
+    from superset.connectors.sqla.models import SqlaTable
+    from superset.daos.chart import ChartDAO
+    from superset.models.core import Database
+    from superset.models.slice import Slice
+    from superset.utils.core import override_user
+
+    # Create the tables of the models in the test database
+    SqlaTable.metadata.create_all(session.get_bind())  # pylint: disable=no-member
+
+    # Create the user that owns a chart
+    owner = User(
+        username="chart_owner",
+        first_name="Alice",
+        last_name="Doe",
+        email="adoe@example.org",
+    )
+
+    # Create one dataset for the two charts
+    database = Database(database_name="my_database", sqlalchemy_uri="sqlite://")
+    table = SqlaTable(table_name="my_table", database=database)
+
+    # Add a chart that the user owns and a chart without owner
+    for name, owners in (("owned_chart", [owner]), ("other_chart", [])):
+        session.add(
+            Slice(
+                slice_name=name,
+                table=table,
+                datasource_type=DatasourceType.TABLE,
+                owners=owners,
+            )
+        )
+    session.flush()
+
+    # The user has no database or dataset access
+    # The user must see only the chart that the user owns
+    with override_user(owner):
+        assert [chart.slice_name for chart in ChartDAO.find_all()] == ["owned_chart"]
