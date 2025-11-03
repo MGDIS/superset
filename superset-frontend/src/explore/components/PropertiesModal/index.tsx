@@ -177,12 +177,13 @@ function PropertiesModal({
       // Retrieving the code from the following issue:
       // https://github.com/apache/superset/pull/33392
       const chartEndpoint = `/api/v1/chart/${slice.slice_id}`;
-      let res = await SupersetClient.put({
+      await SupersetClient.put({
         endpoint: chartEndpoint,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      res = await SupersetClient.get({
+
+      const res = await SupersetClient.get({
         endpoint: chartEndpoint,
       });
       onSave(res.json.result);
