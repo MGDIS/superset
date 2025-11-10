@@ -15,13 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 from operator import and_
+from typing import Optional
 
 import pytest
 
 from superset import db
 from superset.daos.tag import TagDAO
+from superset.models.core import Database
 from superset.models.dashboard import Dashboard
 from superset.models.slice import Slice
+from superset.models.sql_lab import SavedQuery
 from superset.tags.models import ObjectType, Tag, TaggedObject
 from tests.integration_tests.base_tests import SupersetTestCase
 from tests.integration_tests.constants import ADMIN_USERNAME
@@ -63,6 +66,30 @@ class TestTagsDAO(SupersetTestCase):
         db.session.add(tagged_object)
         db.session.commit()
         return tagged_object
+
+    def insert_saved_query(
+        self,
+        label: str,
+        sql: str,
+        db_id: Optional[int] = None,
+        created_by=None,
+        schema: Optional[str] = "",
+        description: Optional[str] = "",
+    ) -> SavedQuery:
+        database = None
+        if db_id:
+            database = db.session.query(Database).get(db_id)
+        query = SavedQuery(
+            database=database,
+            created_by=created_by,
+            sql=sql,
+            label=label,
+            schema=schema,
+            description=description,
+        )
+        db.session.add(query)
+        db.session.commit()
+        return query
 
     @pytest.fixture
     def create_tags(self):
@@ -156,10 +183,46 @@ class TestTagsDAO(SupersetTestCase):
     @pytest.mark.usefixtures("load_world_bank_dashboard_with_slices")
     @pytest.mark.usefixtures("with_tagging_system_feature")
     @pytest.mark.usefixtures("create_tags")
+    def test_get_saved_query_from_tag(self):
+        self.login(ADMIN_USERNAME)
+        admin = self.get_user("admin")
+        # create tagged objects
+        query = self.insert_saved_query(
+            "saved query 1",
+            "SELECT col1, col2 from table1",
+            created_by=admin,
+            schema="public",
+        )
+        query_id = query.id
+        tag = db.session.query(Tag).filter_by(name="example_tag_1").one()
+        self.insert_tagged_object(
+            object_id=query_id, object_type=ObjectType.query, tag_id=tag.id
+        )
+        # get objects
+        tagged_objects = TagDAO.get_tagged_objects_by_tag_names(
+            ["example_tag_1", "example_tag_2"]
+        )
+        assert len(tagged_objects) == 1
+        assert tagged_objects[0]["id"] == query_id
+        assert tagged_objects[0]["created_by"] == admin
+        assert tagged_objects[0]["owners"] == [admin]
+        assert tagged_objects[0]["name"] == "saved query 1"
+
+    @pytest.mark.usefixtures("load_world_bank_dashboard_with_slices")
+    @pytest.mark.usefixtures("with_tagging_system_feature")
+    @pytest.mark.usefixtures("create_tags")
     # test get objects from tag
     def test_get_objects_from_tag(self):
         self.login(ADMIN_USERNAME)
+        admin = self.get_user("admin")
         # create tagged objects
+        query = self.insert_saved_query(
+            "saved query 1",
+            "SELECT col1, col2 from table1",
+            created_by=admin,
+            schema="public",
+        )
+        query_id = query.id
         dashboard = (
             db.session.query(Dashboard)
             .filter(Dashboard.dashboard_title == "World Bank's Data")
@@ -170,13 +233,21 @@ class TestTagsDAO(SupersetTestCase):
         self.insert_tagged_object(
             object_id=dashboard_id, object_type=ObjectType.dashboard, tag_id=tag.id
         )
+        self.insert_tagged_object(
+            object_id=query_id, object_type=ObjectType.query, tag_id=tag.id
+        )
         # get objects
         tagged_objects = TagDAO.get_tagged_objects_by_tag_names(
             ["example_tag_1", "example_tag_2"]
         )
-        assert len(tagged_objects) == 1
+        assert len(tagged_objects) == 2
 
         # test get objects from tag with type
+        tagged_objects = TagDAO.get_tagged_objects_by_tag_names(
+            ["example_tag_1", "example_tag_2"],
+            obj_types=["dashboard", "chart", "query"],
+        )
+        assert len(tagged_objects) == 2
         tagged_objects = TagDAO.get_tagged_objects_by_tag_names(
             ["example_tag_1", "example_tag_2"], obj_types=["dashboard", "chart"]
         )
@@ -185,6 +256,10 @@ class TestTagsDAO(SupersetTestCase):
             ["example_tag_1", "example_tag_2"], obj_types=["chart"]
         )
         assert len(tagged_objects) == 0
+        tagged_objects = TagDAO.get_tagged_objects_by_tag_names(
+            ["example_tag_1", "example_tag_2"], obj_types=["query"]
+        )
+        assert len(tagged_objects) == 1
         # test get all objects
         num_charts = (
             db.session.query(Slice)

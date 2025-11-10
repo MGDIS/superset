@@ -233,10 +233,10 @@ class TagDAO(BaseDAO[Tag]):
                         "name": obj.label,
                         "url": obj.url(),
                         "changed_on": obj.changed_on,
-                        "created_by": obj.created_by_fk,
+                        "created_by": obj.created_by,
                         "creator": obj.creator(),
                         "tags": obj.tags,
-                        "owners": [obj.creator()],
+                        "owners": [obj.created_by],
                     }
                     for obj in SavedQueryDAO.find_by_ids(tagged_queries)
                 )
