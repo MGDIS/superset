@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DEFAULT_D3_FORMAT, DEFAULT_D3_TIME_FORMAT } from '@superset-ui/core';
+import {
+  DEFAULT_D3_FORMAT,
+  DEFAULT_D3_TIME_FORMAT,
+  DEFAULT_SMART_DATE_FORMAT,
+} from '@superset-ui/core';
 import { BootstrapData, CommonBootstrapData } from './types/bootstrapTypes';
 
 export const DATETIME_WITH_TIME_ZONE = 'YYYY-MM-DD HH:mm:ssZ';
@@ -176,6 +180,7 @@ export const DEFAULT_COMMON_BOOTSTRAP_DATA: CommonBootstrapData = {
   d3_format: DEFAULT_D3_FORMAT,
   d3_time_format: DEFAULT_D3_TIME_FORMAT,
   pdf_compression_level: 'MEDIUM',
+  smart_date_format: { en: DEFAULT_SMART_DATE_FORMAT },
 };
 
 export const DEFAULT_BOOTSTRAP_DATA: BootstrapData = {

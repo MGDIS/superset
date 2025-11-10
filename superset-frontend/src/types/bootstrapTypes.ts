@@ -29,6 +29,7 @@ import type {
   FeatureFlagMap,
   JsonObject,
   SequentialSchemeConfig,
+  SmartDateFormat,
 } from '@superset-ui/core';
 
 import {
@@ -169,6 +170,9 @@ export interface CommonBootstrapData {
   d3_format: Partial<FormatLocaleDefinition>;
   d3_time_format: Partial<TimeLocaleDefinition>;
   pdf_compression_level: 'NONE' | 'FAST' | 'MEDIUM' | 'SLOW';
+  smart_date_format: {
+    [x: string]: SmartDateFormat;
+  };
 }
 
 export interface BootstrapData {

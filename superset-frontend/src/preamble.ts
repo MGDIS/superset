@@ -57,6 +57,7 @@ export default function initPreamble(): Promise<void> {
     setupFormatters(
       bootstrapData.common.d3_format,
       bootstrapData.common.d3_time_format,
+      bootstrapData.common.smart_date_format[bootstrapData.common.locale],
     );
 
     // Setup SupersetClient early so we can fetch language pack
