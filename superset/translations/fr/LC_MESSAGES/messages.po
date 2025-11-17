@@ -4026,6 +4026,13 @@ msgstr "Créer une nouvelle balise"
 msgid "Create a new chart"
 msgstr "Créer un nouveau graphique"
 
+msgid ""
+"Create a new tag and assign it to existing entities like charts or "
+"dashboards"
+msgstr ""
+"Créer une nouvelle balise et l'associer à des éléments existants, comme "
+"des graphiques ou des tableaux de bord"
+
 msgid "Create and explore dataset"
 msgstr "Créer et explorer un ensemble de données"
 
@@ -8928,7 +8935,7 @@ msgstr "Modifié"
 
 #, python-format
 msgid "Modified %s"
-msgstr "%s modifié"
+msgstr "Modifié %s"
 
 #, python-format
 msgid "Modified 1 column in the virtual dataset"
@@ -11722,6 +11729,11 @@ msgstr "Pourcentages"
 
 msgid "Search..."
 msgstr "Rechercher…"
+
+msgid "Searches all text fields: Name, Description, Database & Schema"
+msgstr ""
+"Recherche dans tous les champs texte : nom, description, base de données "
+"et schéma"
 
 msgid "Second"
 msgstr "Seconde"
@@ -16352,9 +16364,9 @@ msgstr "Modifier les propriétés"
 msgid "Viewed"
 msgstr "Consulté"
 
-#, fuzzy, python-format
+#, python-format
 msgid "Viewed %s"
-msgstr "%s consulté"
+msgstr "Consulté %s"
 
 #, fuzzy
 msgid "Viewport"
