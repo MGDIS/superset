@@ -32,6 +32,7 @@ export type TagsListProps = {
    */
   onDelete?: ((index: number) => void) | undefined;
   maxTags?: number | undefined;
+  readOnly?: boolean;
 };
 
 const TagsDiv = styled.div`
@@ -46,6 +47,7 @@ const TagsList = ({
   editable = false,
   onDelete,
   maxTags,
+  readOnly = false,
 }: TagsListProps) => {
   const [tempMaxTags, setTempMaxTags] = useState<number | undefined>(maxTags);
 
@@ -80,6 +82,7 @@ const TagsList = ({
               index={index}
               onDelete={handleDelete}
               editable={editable}
+              readOnly={readOnly}
             />
           ))}
           {tags.length > tempMaxTags ? (
@@ -100,6 +103,7 @@ const TagsList = ({
               index={index}
               onDelete={handleDelete}
               editable={editable}
+              readOnly={readOnly}
             />
           ))}
           {maxTags ? (
