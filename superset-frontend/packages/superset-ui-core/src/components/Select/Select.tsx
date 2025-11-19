@@ -38,6 +38,7 @@ import {
   RefSelectProps,
 } from 'antd/es/select';
 import { debounce, isEqual, uniq } from 'lodash';
+import { Empty } from '../EmptyState/Empty';
 import {
   dropDownRenderHelper,
   getOption,
@@ -151,6 +152,17 @@ const Select = forwardRef(
     const isOpeningRef = useRef(false);
     const selectContainerRef = useRef<HTMLDivElement>(null);
     const [dropdownWidth, setDropdownWidth] = useState<number | true>(true);
+
+    // The antd default empty content is in English whatever the locale.
+    // The small class keeps the size of this default content.
+    const renderNotFoundContent = () =>
+      notFoundContent ?? (
+        <Empty
+          className="ant-empty-small"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={t('No data')}
+        />
+      );
 
     useEffect(() => {
       if (oneLine) {
@@ -761,7 +773,9 @@ const Select = forwardRef(
           maxTagCount={actualMaxTagCount}
           maxTagPlaceholder={customMaxTagPlaceholder}
           mode={mappedMode}
-          notFoundContent={isLoading ? t('Loading...') : notFoundContent}
+          notFoundContent={
+            isLoading ? t('Loading...') : renderNotFoundContent()
+          }
           onBlur={handleOnBlur}
           onDeselect={handleOnDeselect}
           onOpenChange={handleOnDropdownVisibleChange}

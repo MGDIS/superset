@@ -11790,9 +11790,8 @@ msgstr "Sélectionner"
 msgid "Select ..."
 msgstr "Sélectionner…"
 
-#, fuzzy
 msgid "Select All"
-msgstr "Désélectionner tout"
+msgstr "Sélectionner tout"
 
 #, fuzzy
 msgid "Select Database and Schema"
@@ -11912,9 +11911,8 @@ msgstr "Selectionner un type de visualisation"
 msgid "Select aggregate options"
 msgstr "Sélectionner les options d’agrégat"
 
-#, fuzzy
 msgid "Select all"
-msgstr "Désélectionner tout"
+msgstr "Sélectionner tout"
 
 #, fuzzy
 msgid "Select all data"

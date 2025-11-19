@@ -44,6 +44,7 @@ import {
 import { debounce, isEqual, uniq } from 'lodash';
 import { Constants, Icons } from '@superset-ui/core/components';
 import { Space } from '../Space';
+import { Empty } from '../EmptyState/Empty';
 import {
   getValue,
   hasOption,
@@ -172,6 +173,17 @@ const AsyncSelect = forwardRef(
       () => setOnChangeCount(onChangeCount + 1),
       [onChangeCount],
     );
+
+    // The antd default empty content is in English whatever the locale.
+    // The small class keeps the size of this default content.
+    const renderNotFoundContent = () =>
+      notFoundContent ?? (
+        <Empty
+          className="ant-empty-small"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={t('No data')}
+        />
+      );
 
     useEffect(() => {
       if (oneLine) {
@@ -615,7 +627,9 @@ const AsyncSelect = forwardRef(
           labelInValue
           maxTagCount={maxTagCount}
           mode={mappedMode}
-          notFoundContent={isLoading ? t('Loading...') : notFoundContent}
+          notFoundContent={
+            isLoading ? t('Loading...') : renderNotFoundContent()
+          }
           onBlur={handleOnBlur}
           onDeselect={handleOnDeselect}
           onOpenChange={handleOnDropdownVisibleChange}
