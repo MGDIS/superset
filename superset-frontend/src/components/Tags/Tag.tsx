@@ -43,6 +43,7 @@ const Tag = ({
   editable = false,
   onClick = undefined,
   toolTipTitle = name,
+  readOnly = false,
 }: TagType) => {
   const isLongTag = useMemo(() => name.length > MAX_DISPLAY_CHAR, [name]);
   const tagDisplay = isLongTag ? `${name.slice(0, MAX_DISPLAY_CHAR)}...` : name;
@@ -68,7 +69,7 @@ const Tag = ({
       ) : (
         <Tooltip title={toolTipTitle} key={toolTipTitle}>
           <StyledTag data-test="tag" key={id} onClick={onClick} role={whatRole}>
-            {id ? (
+            {id && !readOnly ? (
               <a
                 href={`/superset/all_entities/?id=${id}`}
                 target="_blank"
