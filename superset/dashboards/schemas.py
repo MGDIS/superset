@@ -502,6 +502,10 @@ class GetFavStarIdsSchema(Schema):
     )
 
 
+class ImportV1RoleSchema(Schema):
+    name = fields.String(required=True)
+
+
 class ImportV1DashboardSchema(Schema):
     dashboard_title = fields.String(required=True)
     description = fields.String(allow_none=True)
@@ -516,6 +520,7 @@ class ImportV1DashboardSchema(Schema):
     certified_by = fields.String(allow_none=True)
     certification_details = fields.String(allow_none=True)
     published = fields.Boolean(allow_none=True)
+    roles = fields.List(fields.Nested(ImportV1RoleSchema))
     tags = fields.List(fields.String(), allow_none=True)
     theme_uuid = fields.UUID(allow_none=True)
     theme_id = fields.Integer(allow_none=True)
