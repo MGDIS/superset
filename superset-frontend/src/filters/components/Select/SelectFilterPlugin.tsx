@@ -159,6 +159,9 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
     extraFormData: {},
     filterState,
   });
+
+  const latestRequestTimestamp = useRef(0);
+
   const datatype: GenericDataType = coltypeMap[col];
   const labelFormatter = useMemo(
     () =>
@@ -240,10 +243,16 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
           },
         };
 
+        const requestTimestamp = Date.now();
+        latestRequestTimestamp.current = requestTimestamp;
+
         getChartDataRequest({
           formData: fd,
           force: true,
         }).then(({ json }) => {
+          // in case of multiple request, we only care about the latest one
+          if (requestTimestamp < latestRequestTimestamp.current) return;
+
           const datas: ChartDataResponseResult['data'] = json.result[0].data;
           const columnValues = datas.map(
             data => Object.values(data)[0],
