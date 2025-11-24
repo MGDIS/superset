@@ -129,7 +129,11 @@ describe('AllEntitiesTable', () => {
         objects={mockObjectsWithTags}
         canEditTag
       />,
-      { useRouter: true },
+      {
+        useRouter: true,
+        useRedux: true,
+        initialState: { user: { roles: {} } },
+      },
     );
 
     expect(screen.getByText('Dashboards')).toBeInTheDocument();
@@ -159,7 +163,11 @@ describe('AllEntitiesTable', () => {
         objects={mockObjects}
         canEditTag
       />,
-      { useRouter: true },
+      {
+        useRouter: true,
+        useRedux: true,
+        initialState: { user: { roles: {} } },
+      },
     );
 
     expect(screen.queryByText('Dashboards')).not.toBeInTheDocument();

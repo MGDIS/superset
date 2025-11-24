@@ -57,6 +57,8 @@ const mockUser = {
       ['can_write', 'Dashboard'],
       ['can_write', 'Chart'],
       ['can_export', 'Chart'],
+      ['can_read', 'Tag'],
+      ['can_list', 'Tags'],
     ],
   },
 };

@@ -18,9 +18,12 @@
  */
 
 import { useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { styled } from '@apache-superset/core/theme';
 import type { TagType } from 'src/types/TagType';
 import { Tag } from 'src/components/Tag';
+import type { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
+import { findPermission } from 'src/utils/findPermission';
 
 export type TagsListProps = {
   tags: TagType[];
@@ -58,6 +61,14 @@ export const TagsList = ({
   );
   const [tempMaxTags, setTempMaxTags] = useState<number | undefined>(maxTags);
 
+  const { roles } = useSelector<
+    { user: UserWithPermissionsAndRoles },
+    UserWithPermissionsAndRoles
+  >(state => state.user);
+
+  const canListTag = findPermission('can_list', 'Tags', roles);
+  const canReadTag = findPermission('can_read', 'Tag', roles);
+
   const handleDelete = (index: number) => {
     onDelete?.(index);
   };
@@ -85,7 +96,7 @@ export const TagsList = ({
         <>
           {sortedTags.slice(0, tempMaxTags - 1).map((tag: TagType, index) => (
             <Tag
-              id={tag.id}
+              id={canReadTag && canListTag ? tag.id : undefined}
               key={tag.id}
               name={tag.name}
               index={index}
@@ -105,7 +116,7 @@ export const TagsList = ({
         <>
           {sortedTags.map((tag: TagType, index) => (
             <Tag
-              id={tag.id}
+              id={canReadTag && canListTag ? tag.id : undefined}
               key={tag.id}
               name={tag.name}
               index={index}

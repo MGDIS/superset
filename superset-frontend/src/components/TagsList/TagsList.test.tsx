@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { render, waitFor } from 'spec/helpers/testing-library';
+import { render, screen, waitFor } from 'spec/helpers/testing-library';
 import { TagsList, TagsListProps } from '.';
 
 const testTags = [
@@ -54,7 +54,11 @@ const getElementsByClassName = (className: string) =>
 const findAllTags = () => waitFor(() => getElementsByClassName('.ant-tag'));
 
 const setup = (props: TagsListProps = mockedProps) =>
-  render(<TagsList {...props} />, { useRouter: true });
+  render(<TagsList {...props} />, {
+    useRouter: true,
+    useRedux: true,
+    initialState: { user: { roles: {} } },
+  });
 
 test('should render', () => {
   const { container } = setup();
@@ -77,6 +81,15 @@ test('should render 3 elements when maxTags is set to 3', async () => {
   const tagsListItems = await findAllTags();
   expect(tagsListItems).toHaveLength(3);
   expect(tagsListItems[2]).toHaveTextContent('+3...');
+});
+
+test('should not link tags to the all entities page without tag permissions', async () => {
+  setup();
+  const tagsListItems = await findAllTags();
+  expect(tagsListItems).toHaveLength(5);
+
+  // The user has no can_read on Tag and no can_list on Tags
+  expect(screen.queryAllByRole('link')).toHaveLength(0);
 });
 
 // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
