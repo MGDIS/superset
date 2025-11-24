@@ -28,7 +28,6 @@ export interface TagType {
   name: string;
   index?: number | undefined;
   toolTipTitle?: string;
-  readOnly?: boolean;
 }
 
 export default TagType;

@@ -184,8 +184,6 @@ function ChartList(props: ChartListProps) {
   );
   const canReadTag = findPermission('can_read', 'Tag', roles);
 
-  const canEditTag = findPermission('can_write', 'Tag', roles);
-
   const [saveFavoriteStatus, favoriteStatus] = useFavoriteStatus(
     'chart',
     chartIds,
@@ -417,7 +415,6 @@ function ChartList(props: ChartListProps) {
                 : true,
             )}
             maxTags={3}
-            readOnly={!canEditTag}
           />
         ),
         Header: t('Tags'),
