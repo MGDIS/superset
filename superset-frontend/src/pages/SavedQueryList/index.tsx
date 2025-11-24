@@ -126,8 +126,6 @@ function SavedQueryList({
 
   const canEditTag = findPermission('can_write', 'Tag', roles);
 
-  const tagsReadOnly = !canEditTag;
-
   const [queryCurrentlyDeleting, setQueryCurrentlyDeleting] =
     useState<SavedQueryObject | null>(null);
   const [savedQueryCurrentlyPreviewing, setSavedQueryCurrentlyPreviewing] =
@@ -397,7 +395,7 @@ function SavedQueryList({
           // Only show custom type tags
           <TagsList
             tags={tags.filter((tag: Tag) => tag.type === 1)}
-            readOnly={tagsReadOnly}
+            readOnly={!canEditTag}
           />
         ),
         Header: t('Tags'),

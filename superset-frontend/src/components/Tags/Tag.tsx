@@ -54,7 +54,7 @@ const Tag = ({
 
   const tagElem = (
     <>
-      {editable ? (
+      {editable && !readOnly ? (
         <Tooltip title={toolTipTitle} key={toolTipTitle}>
           <StyledTag
             key={id}

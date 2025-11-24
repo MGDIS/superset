@@ -147,8 +147,6 @@ function DashboardList(props: DashboardListProps) {
 
   const canEditTag = findPermission('can_write', 'Tag', roles);
 
-  const tagsReadOnly = !canEditTag;
-
   const {
     state: {
       loading,
@@ -377,7 +375,7 @@ function DashboardList(props: DashboardListProps) {
               (tag: Tag) => tag.type === 'TagTypes.custom' || tag.type === 1,
             )}
             maxTags={3}
-            readOnly={tagsReadOnly}
+            readOnly={!canEditTag}
           />
         ),
         Header: t('Tags'),
