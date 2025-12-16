@@ -204,6 +204,10 @@ export function DatabaseSelector({
     [],
   );
 
+  const [databaseOptions, setDatabaseOptions] = useState<
+    DatabaseValue[] | null
+  >();
+
   const loadDatabases = useMemo(
     () =>
       async (
@@ -257,6 +261,8 @@ export function DatabaseSelector({
             order,
           }));
 
+          setDatabaseOptions(options);
+
           return {
             data: options,
             totalCount: count ?? options.length,
@@ -265,6 +271,16 @@ export function DatabaseSelector({
       },
     [formMode, getDbList, sqlLabMode, onEmptyResults],
   );
+
+  useEffect(() => {
+    if (databaseOptions?.length === 1) {
+      setCurrentDb(databaseOptions[0]);
+      if (onDbChange) {
+        onDbChange(databaseOptions[0]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [databaseOptions]);
 
   useEffect(() => {
     setCurrentDb(current =>
