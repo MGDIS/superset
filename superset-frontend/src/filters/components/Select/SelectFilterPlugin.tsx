@@ -138,7 +138,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
   );
 
   const updateDataMask = useCallback(
-    (values: SelectValue) => {
+    async (values: SelectValue) => {
       const emptyFilter =
         enableEmptyFilter && !inverseSelection && !values?.length;
 
@@ -176,37 +176,39 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
           groupby: [columnValue],
         };
 
-        if (filterState?.value?.length > 0) {
+        const filterStateValue = dataMask?.filterState?.value;
+
+        if (filterStateValue && filterStateValue.length > 0) {
           fd.extra_form_data = {
-            filters: [{ col: columnLabel, op: 'IN', val: filterState.value }],
+            filters: [{ col: columnLabel, op: 'IN', val: filterStateValue }],
           };
         }
 
         const requestTimestamp = Date.now();
         latestRequestTimestamp.current = requestTimestamp;
 
-        getChartDataRequest({
+        const { json } = await getChartDataRequest({
           formData: fd,
           force: true,
-        }).then(({ json }) => {
-          // in case of multiple request, we only care about the latest one
-          if (requestTimestamp < latestRequestTimestamp.current) return;
+        });
 
-          const datas: ChartDataResponseResult['data'] = json.result[0].data;
-          const columnValues = datas.map(
-            data => Object.values(data)[0],
-          ) as string[];
+        // in case of multiple request, we only care about the latest one
+        if (requestTimestamp < latestRequestTimestamp.current) return;
 
-          dispatchDataMask({
-            ...dataMask,
-            type: 'filterState',
-            extraFormData: getSelectExtraFormData(
-              columnValue,
-              columnValues,
-              emptyFilter,
-              inverseSelection,
-            ),
-          });
+        const datas: ChartDataResponseResult['data'] = json.result[0].data;
+        const columnValues = filterStateValue
+          ? (datas.map(data => Object.values(data)[0]) as string[])
+          : [];
+
+        dispatchDataMask({
+          ...dataMask,
+          type: 'filterState',
+          extraFormData: getSelectExtraFormData(
+            columnValue,
+            columnValues,
+            emptyFilter,
+            inverseSelection,
+          ),
         });
       } else {
         dispatchDataMask({
