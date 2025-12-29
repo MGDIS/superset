@@ -55,18 +55,7 @@ export const useNativeFilters = () => {
   const missingInitialFilters = useMemo(
     () =>
       requiredFirstFilter
-        .filter(({ id, targets }) => {
-          const filterStateValue = dataMask[id]?.filterState?.value;
-          const columnValue = targets?.[0]?.column?.columnValue;
-          const extraFormData = dataMask[id]?.extraFormData;
-          const c1 = !columnValue && filterStateValue === undefined;
-          const c2 =
-            columnValue &&
-            filterStateValue === undefined &&
-            extraFormData?.filters &&
-            extraFormData?.filters?.length > 0;
-          return c1 || c2;
-        })
+        .filter(({ id }) => dataMask[id]?.filterState?.value === undefined)
         .map(({ name }) => name),
     [requiredFirstFilter, dataMask],
   );

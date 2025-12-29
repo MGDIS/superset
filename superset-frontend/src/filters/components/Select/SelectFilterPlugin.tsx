@@ -138,7 +138,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
   );
 
   const updateDataMask = useCallback(
-    async (values: SelectValue) => {
+    (values: SelectValue) => {
       const emptyFilter =
         enableEmptyFilter && !inverseSelection && !values?.length;
 
@@ -187,28 +187,28 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         const requestTimestamp = Date.now();
         latestRequestTimestamp.current = requestTimestamp;
 
-        const { json } = await getChartDataRequest({
+        getChartDataRequest({
           formData: fd,
           force: true,
-        });
+        }).then(({ json }) => {
+          // in case of multiple request, we only care about the latest one
+          if (requestTimestamp < latestRequestTimestamp.current) return;
 
-        // in case of multiple request, we only care about the latest one
-        if (requestTimestamp < latestRequestTimestamp.current) return;
+          const datas: ChartDataResponseResult['data'] = json.result[0].data;
+          const columnValues = filterStateValue
+            ? (datas.map(data => Object.values(data)[0]) as string[])
+            : [];
 
-        const datas: ChartDataResponseResult['data'] = json.result[0].data;
-        const columnValues = filterStateValue
-          ? (datas.map(data => Object.values(data)[0]) as string[])
-          : [];
-
-        dispatchDataMask({
-          ...dataMask,
-          type: 'filterState',
-          extraFormData: getSelectExtraFormData(
-            columnValue,
-            columnValues,
-            emptyFilter,
-            inverseSelection,
-          ),
+          dispatchDataMask({
+            ...dataMask,
+            type: 'filterState',
+            extraFormData: getSelectExtraFormData(
+              columnValue,
+              columnValues,
+              emptyFilter,
+              inverseSelection,
+            ),
+          });
         });
       } else {
         dispatchDataMask({
