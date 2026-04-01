@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, TYPE_CHECKING
 
 from flask import current_app as app
@@ -120,3 +121,17 @@ def warm_and_release_connection(instance: Any, *relationships: str) -> None:
         session.commit()  # pylint: disable=consider-using-transaction
     finally:
         session.expire_on_commit = True
+
+
+def parse_resource(resource_name: str) -> list[str]:
+    """
+    Parses a resource string looking like "[database].[catalog].[schema]" or
+    "[database].[schema]" and returns a list of its components.
+    Handles dots in any part.
+    """
+    if not resource_name:
+        return []
+
+    # Regex to match components within square brackets
+    pattern = r"\[(.*?)\]"
+    return re.findall(pattern, resource_name)
