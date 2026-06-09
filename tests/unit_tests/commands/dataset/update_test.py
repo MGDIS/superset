@@ -16,11 +16,14 @@
 # under the License.
 
 from typing import Any, cast
+from unittest.mock import MagicMock
 
 import pytest
+from flask_appbuilder.security.sqla.models import Role
 from marshmallow import ValidationError
 from pytest_mock import MockerFixture
 
+from superset import db
 from superset.commands.dataset.exceptions import (
     DatabaseNotFoundValidationError,
     DatasetExistsValidationError,
@@ -36,9 +39,11 @@ from superset.commands.dataset.update import (
     validate_folders,
 )
 from superset.commands.exceptions import OwnersNotFoundValidationError
+from superset.connectors.sqla.models import SqlaTable
 from superset.datasets.schemas import FolderSchema
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 from superset.exceptions import SupersetSecurityException
+from superset.models.core import Database
 from tests.unit_tests.conftest import with_feature_flags
 
 
@@ -238,6 +243,116 @@ def test_update_dataset_validation_errors(
     with pytest.raises(DatasetInvalidError) as excinfo:
         UpdateDatasetCommand(1, payload).run()
     assert any(error_msg in str(exc) for exc in excinfo.value._exceptions)
+
+
+def test_update_validate_roles_when_in_payload(mocker: MockerFixture) -> None:
+    """When the payload contains "roles", `populate_roles` is called and
+    the resolved roles are stored in `command._properties["roles"]`."""
+
+    # Create a dataset in the test database
+    SqlaTable.metadata.create_all(db.session.get_bind())
+    database = Database(database_name="my_db_3", sqlalchemy_uri="sqlite://")
+    dataset = SqlaTable(table_name="bar", schema="foo", database=database)
+    db.session.add_all([database, dataset])
+    db.session.commit()
+
+    # Simulate a logged-in user
+    mock_g = mocker.patch("superset.security.manager.g")
+    mock_g.user = MagicMock()
+
+    # Allow DAO to see the created datasource
+    mocker.patch(
+        "superset.views.base.security_manager.can_access_all_datasources",
+        return_value=True,
+    )
+
+    # Skip the ownership check and the computation of the owners
+    mocker.patch(
+        "superset.commands.dataset.update.security_manager.raise_for_ownership",
+        return_value=None,
+    )
+    mocker.patch.object(UpdateDatasetCommand, "compute_owners", return_value=[])
+
+    # Return two roles when the command resolves the role IDs
+    resolved_roles = [MagicMock(id=1), MagicMock(id=2)]
+    populate_roles_mock = mocker.patch(
+        "superset.commands.dataset.update.populate_roles",
+        return_value=resolved_roles,
+    )
+
+    # Validate an update request that contains role IDs
+    command = UpdateDatasetCommand(
+        dataset.id,
+        {
+            "table_name": "bar",
+            "schema": "foo",
+            "roles": [1, 2],
+        },
+    )
+    command.validate()
+
+    # The command resolves the role IDs one time
+    populate_roles_mock.assert_called_once_with([1, 2])
+
+    # The command keeps the resolved roles for the update
+    assert command._properties["roles"] == resolved_roles
+
+
+def test_update_does_not_validate_roles_when_not_in_payload(
+    mocker: MockerFixture,
+) -> None:
+    """When the payload does not contain "roles", `populate_roles` is not called
+    and the roles of the dataset stay the same."""
+
+    # Create a dataset with an existing role in the test database
+    SqlaTable.metadata.create_all(db.session.get_bind())
+    database = Database(database_name="my_db_2", sqlalchemy_uri="sqlite://")
+    role = Role(name="dataset_role")
+    dataset = SqlaTable(table_name="bar", schema="foo", database=database, roles=[role])
+    db.session.add_all([database, role, dataset])
+    db.session.commit()
+
+    # Simulate a logged-in user
+    mock_g = mocker.patch("superset.security.manager.g")
+    mock_g.user = MagicMock()
+
+    # Skip the ownership check and the computation of the owners
+    mocker.patch(
+        "superset.commands.dataset.update.security_manager.raise_for_ownership",
+        return_value=None,
+    )
+    mocker.patch.object(UpdateDatasetCommand, "compute_owners", return_value=[])
+
+    # Allow DAO to see the created datasource
+    mocker.patch(
+        "superset.views.base.security_manager.can_access_all_datasources",
+        return_value=True,
+    )
+
+    # Make the validation fail if the command tries to resolve the roles
+    populate_roles_mock = mocker.patch(
+        "superset.commands.dataset.update.populate_roles",
+        side_effect=ValidationError("populate_roles should not be called"),
+    )
+
+    # Run an update request without role IDs
+    command = UpdateDatasetCommand(
+        dataset.id,
+        {
+            "table_name": "bar",
+            "schema": "foo",
+        },
+    )
+    command.run()
+
+    # The command does not look for the roles
+    populate_roles_mock.assert_not_called()
+
+    # The command does not overwrite the roles of the dataset
+    assert "roles" not in command._properties
+
+    # The dataset keeps its existing role after the update
+    assert dataset.roles == [role]
 
 
 @with_feature_flags(DATASET_FOLDERS=True)
