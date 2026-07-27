@@ -18,6 +18,7 @@
  */
 import * as reactRedux from 'react-redux';
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -29,7 +30,18 @@ import fetchMock from 'fetch-mock';
 import { SaveDatasetModal } from 'src/SqlLab/components/SaveDatasetModal';
 import { createDatasource } from 'src/SqlLab/actions/sqlLab';
 import { user, testQuery, mockdatasets } from 'src/SqlLab/fixtures';
-import { FeatureFlag } from '@superset-ui/core';
+import { FeatureFlag, getClientErrorObject } from '@superset-ui/core';
+
+jest.mock('@superset-ui/core', () => ({
+  ...jest.requireActual('@superset-ui/core'),
+  getClientErrorObject: jest.fn(() =>
+    Promise.resolve({
+      error: 'An error occurred while overwriting the dataset',
+    }),
+  ),
+}));
+
+const mockedGetClientErrorObject = getClientErrorObject as jest.Mock;
 
 const mockedProps = {
   visible: true,
@@ -376,5 +388,85 @@ describe('SaveDatasetModal', () => {
 
     expect(clearDatasetCache).toBeDefined();
     expect(typeof clearDatasetCache).toBe('function');
+  });
+
+  const overwriteFirstDataset = async () => {
+    const overwriteRadioBtn = screen.getByRole('radio', {
+      name: /overwrite existing/i,
+    });
+    userEvent.click(overwriteRadioBtn);
+
+    const select = screen.getByRole('combobox', { name: /existing dataset/i });
+    userEvent.click(select);
+
+    await waitFor(() =>
+      expect(screen.queryByText('Loading...')).not.toBeVisible(),
+    );
+
+    const option = screen.getAllByText('coolest table 0')[1];
+    userEvent.click(option);
+
+    const overwriteConfirmationBtn = screen.getByRole('button', {
+      name: /overwrite/i,
+    });
+    // first click reveals the confirmation screen
+    userEvent.click(overwriteConfirmationBtn);
+    // second click actually triggers the overwrite request
+    userEvent.click(screen.getByRole('button', { name: /overwrite/i }));
+  };
+
+  test('overwrites the dataset successfully without showing an error toast', async () => {
+    const dummyDispatch = jest.fn().mockResolvedValue({});
+    useDispatchMock.mockReturnValue(dummyDispatch);
+    useSelectorMock.mockReturnValue({ ...user });
+    mockedGetClientErrorObject.mockClear();
+
+    fetchMock.removeRoutes({ names: ['overwriteDataset'] });
+    fetchMock.put(
+      'glob:*/api/v1/dataset/0*',
+      { result: 'form_data_key' },
+      { name: 'overwriteDataset' },
+    );
+
+    render(<SaveDatasetModal {...mockedProps} />, { useRedux: true });
+
+    await overwriteFirstDataset();
+
+    await waitFor(() => {
+      expect(fetchMock.callHistory.calls('overwriteDataset').length).toBe(1);
+    });
+
+    expect(mockedGetClientErrorObject).not.toHaveBeenCalled();
+    expect(dummyDispatch).not.toHaveBeenCalled();
+  });
+
+  test('dispatches an error toast when overwriting the dataset fails', async () => {
+    const dummyDispatch = jest.fn().mockResolvedValue({});
+    useDispatchMock.mockReturnValue(dummyDispatch);
+    useSelectorMock.mockReturnValue({ ...user });
+    mockedGetClientErrorObject.mockClear();
+
+    fetchMock.removeRoutes({ names: ['overwriteDataset'] });
+    fetchMock.put(
+      'glob:*/api/v1/dataset/0*',
+      { throws: new Error('Network error') },
+      { name: 'overwriteDataset' },
+    );
+
+    render(<SaveDatasetModal {...mockedProps} />, { useRedux: true });
+
+    await overwriteFirstDataset();
+
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+
+    await waitFor(() => {
+      expect(mockedGetClientErrorObject).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(dummyDispatch).toHaveBeenCalled();
+    });
   });
 });
