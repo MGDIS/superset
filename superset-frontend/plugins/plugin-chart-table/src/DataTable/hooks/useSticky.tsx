@@ -166,9 +166,10 @@ function StickyWrap({
   const { bodyHeight, columnWidths, hasVerticalScroll } = sticky;
   // header/footer never carry a real vertical scrollbar of their own; when the body does,
   // its clientWidth shrinks by the scrollbar's width, which drifts the two out of sync once
-  // horizontal scroll reaches the end (some browsers don't apply scrollbarGutter consistently
-  // on an overflow:hidden element) — narrow header/footer explicitly by the same amount so both
-  // reach the same max scrollLeft
+  // horizontal scroll reaches the end. Narrow header/footer explicitly by the same amount so
+  // both reach the same max scrollLeft — deliberately not scrollbarGutter (removed from their
+  // style below): that property's effect on an overflow:hidden axis isn't consistent enough
+  // across browsers, and stacking it on top of this explicit width would double-subtract it
   const stickyTableWidth = hasVerticalScroll
     ? maxWidth - scrollBarSize
     : maxWidth;
@@ -274,7 +275,6 @@ function StickyWrap({
         style={{
           width: stickyTableWidth,
           overflow: 'hidden',
-          scrollbarGutter: 'stable',
         }}
         role="presentation"
       >
@@ -295,7 +295,6 @@ function StickyWrap({
         style={{
           width: stickyTableWidth,
           overflow: 'hidden',
-          scrollbarGutter: 'stable',
         }}
         role="presentation"
       >
