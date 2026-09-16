@@ -163,7 +163,7 @@ function StickyWrap({
   const scrollBodyRef = useRef<HTMLDivElement>(null); // main body
 
   const scrollBarSize = getScrollBarSize();
-  const { bodyHeight, columnWidths } = sticky;
+  const { bodyHeight, columnWidths, hasVerticalScroll } = sticky;
   const needSizer =
     !columnWidths ||
     sticky.width !== maxWidth ||
@@ -259,13 +259,18 @@ function StickyWrap({
       </colgroup>
     );
 
+    const headerContainerWidth = hasVerticalScroll
+      ? maxWidth - scrollBarSize
+      : maxWidth;
+
     headerTable = (
       <div
         key="header"
         ref={scrollHeaderRef}
         style={{
           overflow: 'hidden',
-          scrollbarGutter: 'stable',
+          width: headerContainerWidth,
+          boxSizing: 'border-box',
         }}
         role="presentation"
       >
@@ -285,7 +290,8 @@ function StickyWrap({
         ref={scrollFooterRef}
         style={{
           overflow: 'hidden',
-          scrollbarGutter: 'stable',
+          width: headerContainerWidth,
+          boxSizing: 'border-box',
         }}
         role="presentation"
       >
@@ -314,7 +320,9 @@ function StickyWrap({
         style={{
           height: bodyHeight,
           overflow: 'auto',
-          scrollbarGutter: 'stable',
+          scrollbarGutter: hasVerticalScroll ? 'stable' : undefined,
+          width: maxWidth,
+          boxSizing: 'border-box',
         }}
         onScroll={sticky.hasHorizontalScroll ? onScroll : undefined}
         role="presentation"
