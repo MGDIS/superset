@@ -154,6 +154,7 @@ ENV SUPERSET_HOME="/app/superset_home" \
 
 # Copy the entrypoints, make them executable in userspace
 COPY --chmod=755 docker/entrypoints /app/docker/entrypoints
+COPY docker/gunicorn /app/docker/gunicorn
 
 WORKDIR /app
 # Set up necessary directories and user

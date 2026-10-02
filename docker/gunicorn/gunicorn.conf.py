@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,20 +14,30 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-urllib3>=1.26.18
-werkzeug>=3.0.1
-numexpr>=2.9.0
+from gunicorn.arbiter import Arbiter
+from gunicorn.workers.base import Worker
+from gunicorn_prometheus_exporter.hooks import (
+    default_on_exit,
+    default_on_starting,
+    default_post_fork,
+    default_when_ready,
+    default_worker_int,
+)
+from prometheus_client import multiprocess
 
-# 5.0.0 has a sensitive deprecation used in other libs
-# -> https://github.com/aio-libs/async-timeout/blob/master/CHANGES.rst#500-2024-10-31
-async_timeout>=4.0.0,<5.0.0
+pythonpath = "/app/docker/gunicorn"
 
-# Pin setuptools <81 until all dependencies migrate from pkg_resources to importlib.metadata
-# pkg_resources is deprecated and will be removed in setuptools 81+ (around 2025-11-30)
-# Known affected packages: Preset's 'clients' package
-# See docs/docs/contributing/pkg-resources-migration.md for details
-setuptools<81
+on_starting = default_on_starting
+when_ready = default_when_ready
+post_fork = default_post_fork
+worker_int = default_worker_int
+on_exit = default_on_exit
 
-# Gunicorn worker exporting Prometheus metrics, enabled by GUNICORN_PROMETHEUS_ENABLED in run-server.sh
-gunicorn-prometheus-exporter==0.2.4
+
+def child_exit(server: Arbiter, worker: Worker) -> None:
+    """Drop the liveall gauges of an exited worker so it stops being reported.
+
+    :param server: Gunicorn arbiter
+    :param worker: Exited worker
+    """
+    multiprocess.mark_process_dead(worker.pid)

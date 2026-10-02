@@ -70,6 +70,22 @@ Don't forget to reload the page to take the new frontend into account though.
 
 It is possible to run Superset in non-development mode by using [`docker-compose-non-dev.yml`](../docker-compose-non-dev.yml). This file excludes the volumes needed for development.
 
+## Gunicorn Prometheus metrics
+
+Setting `GUNICORN_PROMETHEUS_ENABLED=true` makes [`run-server.sh`](./entrypoints/run-server.sh) start gunicorn with
+[gunicorn-prometheus-exporter](https://github.com/Agent-Hellboy/gunicorn-prometheus-exporter) and the
+[`MgPrometheusThreadWorker`](./gunicorn/mg_prometheus_worker.py) worker. Metrics are then served on
+`http://<host>:9091/metrics`. Besides the exporter metrics, each worker reports `gunicorn_worker_threads`,
+`gunicorn_worker_busy_threads` and `gunicorn_worker_queued_requests`.
+
+| Variable                      | Default                                         | Description                                   |
+| ----------------------------- | ----------------------------------------------- | --------------------------------------------- |
+| `GUNICORN_PROMETHEUS_ENABLED` | `false`                                         | Enable the metrics endpoint                   |
+| `PROMETHEUS_METRICS_PORT`     | `9091`                                          | Port of the metrics endpoint                  |
+| `PROMETHEUS_BIND_ADDRESS`     | `0.0.0.0`                                       | Bind address of the metrics endpoint          |
+| `PROMETHEUS_MULTIPROC_DIR`    | `/tmp/prometheus_multiproc`                     | Directory shared by workers, wiped at startup |
+| `SERVER_WORKER_CLASS`         | `mg_prometheus_worker.MgPrometheusThreadWorker` | Gunicorn worker class when enabled            |
+
 ## Resource Constraints
 
 If you are attempting to build on macOS and it exits with 137 you need to increase your Docker resources. See instructions [here](https://docs.docker.com/docker-for-mac/#advanced) (search for memory)
