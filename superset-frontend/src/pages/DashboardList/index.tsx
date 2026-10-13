@@ -70,8 +70,8 @@ import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { findPermission } from 'src/utils/findPermission';
 import { ModifiedInfo } from 'src/components/AuditInfo';
 import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
-const PAGE_SIZE = 25;
 const PASSWORDS_NEEDED_MESSAGE = t(
   'The passwords for the databases below are needed in order to ' +
     'import them together with the dashboards. Please note that the ' +

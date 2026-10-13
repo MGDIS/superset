@@ -75,6 +75,7 @@ import { ModifiedInfo } from 'src/components/AuditInfo';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
 import Owner from 'src/types/Owner';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const FlexRowContainer = styled.div`
   align-items: center;
@@ -92,7 +93,6 @@ const FlexRowContainer = styled.div`
   }
 `;
 
-const PAGE_SIZE = 25;
 const PASSWORDS_NEEDED_MESSAGE = t(
   'The passwords for the databases below are needed in order to ' +
     'import them together with the charts. Please note that the ' +
