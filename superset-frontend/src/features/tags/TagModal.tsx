@@ -22,7 +22,12 @@ import rison from 'rison';
 import Modal from 'src/components/Modal';
 import AsyncSelect from 'src/components/Select/AsyncSelect';
 import { FormLabel } from 'src/components/Form';
-import { t, styled, SupersetClient } from '@superset-ui/core';
+import {
+  getClientErrorObject,
+  t,
+  styled,
+  SupersetClient,
+} from '@superset-ui/core';
 import { Input } from 'antd';
 import { Divider } from 'src/components/Divider';
 import Button from 'src/components/Button';
@@ -238,8 +243,9 @@ const TagModal: FC<TagModalProps> = ({
           addSuccessToast(t('Tag updated'));
           onHide();
         })
-        .catch(err => {
-          addDangerToast(err.message || 'Error Updating Tag');
+        .catch(async err => {
+          const { error } = await getClientErrorObject(err);
+          addDangerToast(error || 'Error Updating Tag');
         });
     } else {
       SupersetClient.post({
@@ -256,7 +262,10 @@ const TagModal: FC<TagModalProps> = ({
           addSuccessToast(t('Tag created'));
           onHide();
         })
-        .catch(err => addDangerToast(err.message || 'Error Creating Tag'));
+        .catch(async err => {
+          const { error } = await getClientErrorObject(err);
+          addDangerToast(error || t('Error Creating Tag'));
+        });
     }
   };
 

@@ -17,6 +17,7 @@
 from typing import Optional
 
 from flask_babel import lazy_gettext as _
+from marshmallow import ValidationError
 
 from superset.commands.exceptions import (
     CommandException,
@@ -30,6 +31,11 @@ from superset.commands.exceptions import (
 
 class TagInvalidError(CommandInvalidError):
     message = _("Tag parameters are invalid.")
+
+
+class TagNameExistsValidationError(ValidationError):
+    def __init__(self) -> None:
+        super().__init__([_("A tag with this name already exists")], field_name="name")
 
 
 class TagCreateFailedError(CreateFailedError):

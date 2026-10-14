@@ -665,6 +665,9 @@ msgid ""
 "templating syntax"
 msgstr ""
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid ""
 "A time series chart that visualizes how a related metric from multiple "
 "groups vary over time. Each group is visualized using a different color."
@@ -4501,6 +4504,9 @@ msgstr ""
 
 msgid "Error"
 msgstr "Hata"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr ""

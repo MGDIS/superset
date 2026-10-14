@@ -747,6 +747,9 @@ msgstr ""
 "Um conjunto de parâmetros que tornar-se disponível na consulta usando a "
 "sintaxe de modelagem Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid ""
 "A time series chart that visualizes how a related metric from multiple "
 "groups vary over time. Each group is visualized using a different color."
@@ -4955,6 +4958,9 @@ msgstr "Igual para (=)"
 
 msgid "Error"
 msgstr "Erro"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"
