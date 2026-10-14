@@ -2252,7 +2252,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                     continue
 
                 schema_perm = self.get_schema_perm(
-                    database.database_name,
+                    database,
                     table_.catalog,
                     table_.schema,
                 )
