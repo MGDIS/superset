@@ -19,7 +19,11 @@ from functools import partial
 from typing import Any
 
 from superset.commands.base import BaseCommand, CreateMixin
-from superset.commands.tag.exceptions import TagCreateFailedError, TagInvalidError
+from superset.commands.tag.exceptions import (
+    TagCreateFailedError,
+    TagInvalidError,
+    TagNameExistsValidationError,
+)
 from superset.commands.tag.utils import (
     current_user_can_modify_object,
     to_object_model,
@@ -76,19 +80,25 @@ class CreateCustomTagWithRelationshipsCommand(CreateMixin, BaseCommand):
     def run(self) -> tuple[set[tuple[str, int]], set[tuple[str, int]]]:
         self.validate()
 
-        tag_name = self._properties["name"]
-        tag = TagDAO.get_by_name(tag_name.strip(), TagType.custom)
+        tag_name = self._properties["name"].strip()
+        is_new_tag = TagDAO.find_by_name(tag_name) is None
+        tag = TagDAO.get_by_name(tag_name, TagType.custom)
         TagDAO.create_tag_relationship(
             objects_to_tag=self._properties.get("objects_to_tag", []),
             tag=tag,
             bulk_create=self._bulk_create,
         )
 
-        tag.description = self._properties.get("description", "")
+        if is_new_tag:
+            tag.description = self._properties.get("description", "")
         return set(self._properties["objects_to_tag"]), self._skipped_tagged_objects
 
     def validate(self) -> None:
         exceptions = []
+        if not self._bulk_create and TagDAO.find_by_name(
+            self._properties["name"].strip()
+        ):
+            exceptions.append(TagNameExistsValidationError())
         objects_to_tag = set(self._properties.get("objects_to_tag", []))
 
         for obj_type, obj_id in objects_to_tag:
@@ -100,9 +110,7 @@ class CreateCustomTagWithRelationshipsCommand(CreateMixin, BaseCommand):
                 continue
 
             try:
-                if model := to_object_model(
-                    object_type, obj_id, skip_base_filter=True
-                ):
+                if model := to_object_model(object_type, obj_id, skip_base_filter=True):
                     if not current_user_can_modify_object(model):
                         self._skipped_tagged_objects.add((obj_type, obj_id))
             except Exception as e:

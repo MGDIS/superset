@@ -21,9 +21,9 @@ from superset import security_manager
 from superset.daos.chart import ChartDAO
 from superset.daos.dashboard import DashboardDAO
 from superset.daos.query import SavedQueryDAO
+from superset.exceptions import SupersetSecurityException
 from superset.models.dashboard import Dashboard
 from superset.models.slice import Slice
-from superset.exceptions import SupersetSecurityException
 from superset.models.sql_lab import SavedQuery
 from superset.tags.models import ObjectType
 

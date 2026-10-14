@@ -108,16 +108,17 @@ def test_create_command_success(session_with_data: Session, mocker: MockerFixtur
         )
 
 
-def test_create_command_success_clear(
+def test_create_command_existing_name_rejected(
     session_with_data: Session, mocker: MockerFixture
 ):
     from superset.commands.tag.create import CreateCustomTagWithRelationshipsCommand
+    from superset.commands.tag.exceptions import TagInvalidError
+    from superset.daos.tag import TagDAO
     from superset.models.dashboard import Dashboard
     from superset.models.slice import Slice
     from superset.models.sql_lab import SavedQuery
     from superset.tags.models import ObjectType, TaggedObject
 
-    # Define a list of objects to tag
     query = db.session.query(SavedQuery).first()
     chart = db.session.query(Slice).first()
     dashboard = db.session.query(Dashboard).first()
@@ -135,12 +136,103 @@ def test_create_command_success_clear(
     ]
 
     CreateCustomTagWithRelationshipsCommand(
-        data={"name": "test_tag", "objects_to_tag": objects_to_tag}
+        data={
+            "name": "test_tag",
+            "description": "original",
+            "objects_to_tag": objects_to_tag,
+        }
     ).run()
     assert len(db.session.query(TaggedObject).all()) == len(objects_to_tag)
 
+    with pytest.raises(TagInvalidError) as excinfo:
+        CreateCustomTagWithRelationshipsCommand(
+            data={
+                "name": "test_tag",
+                "description": "overwritten",
+                "objects_to_tag": [],
+            }
+        ).run()
+
+    assert excinfo.value.normalized_messages() == {
+        "name": ["A tag with this name already exists"]
+    }
+    assert len(db.session.query(TaggedObject).all()) == len(objects_to_tag)
+    assert TagDAO.find_by_name("test_tag").description == "original"
+
+
+def test_create_command_bulk_existing_name_keeps_description(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.create import CreateCustomTagWithRelationshipsCommand
+    from superset.daos.tag import TagDAO
+    from superset.models.dashboard import Dashboard
+    from superset.models.slice import Slice
+    from superset.tags.models import ObjectType
+
+    chart = db.session.query(Slice).first()
+    dashboard = db.session.query(Dashboard).first()
+
+    mocker.patch(
+        "superset.security.SupersetSecurityManager.is_admin", return_value=True
+    )
+    mocker.patch("superset.daos.chart.ChartDAO.find_by_id", return_value=chart)
+    mocker.patch(
+        "superset.daos.dashboard.DashboardDAO.find_by_id", return_value=dashboard
+    )
+
     CreateCustomTagWithRelationshipsCommand(
-        data={"name": "test_tag", "objects_to_tag": []}
+        data={
+            "name": "test_tag",
+            "description": "original",
+            "objects_to_tag": [(ObjectType.chart, chart.id)],
+        }
+    ).run()
+    CreateCustomTagWithRelationshipsCommand(
+        data={
+            "name": "test_tag",
+            "description": None,
+            "objects_to_tag": [(ObjectType.dashboard, dashboard.id)],
+        },
+        bulk_create=True,
     ).run()
 
-    assert len(db.session.query(TaggedObject).all()) == 0
+    assert TagDAO.find_by_name("test_tag").description == "original"
+
+
+def test_create_command_bulk_existing_name_adds_to_existing_tag(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.create import CreateCustomTagWithRelationshipsCommand
+    from superset.models.dashboard import Dashboard
+    from superset.models.slice import Slice
+    from superset.tags.models import ObjectType, TaggedObject
+
+    chart = db.session.query(Slice).first()
+    dashboard = db.session.query(Dashboard).first()
+
+    mocker.patch(
+        "superset.security.SupersetSecurityManager.is_admin", return_value=True
+    )
+    mocker.patch("superset.daos.chart.ChartDAO.find_by_id", return_value=chart)
+    mocker.patch(
+        "superset.daos.dashboard.DashboardDAO.find_by_id", return_value=dashboard
+    )
+
+    CreateCustomTagWithRelationshipsCommand(
+        data={"name": "test_tag", "objects_to_tag": [(ObjectType.chart, chart.id)]}
+    ).run()
+    CreateCustomTagWithRelationshipsCommand(
+        data={
+            "name": "test_tag",
+            "objects_to_tag": [(ObjectType.dashboard, dashboard.id)],
+        },
+        bulk_create=True,
+    ).run()
+
+    tagged = {
+        (obj.object_type, obj.object_id) for obj in db.session.query(TaggedObject)
+    }
+    assert tagged == {
+        (ObjectType.chart, chart.id),
+        (ObjectType.dashboard, dashboard.id),
+    }
