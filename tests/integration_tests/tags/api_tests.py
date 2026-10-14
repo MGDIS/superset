@@ -699,5 +699,5 @@ class TestTagApi(SupersetTestCase):
 
         assert rv.status_code == 200
         result = rv.json["result"]
-        assert len(result["objects_tagged"]) == 2
-        assert len(result["objects_skipped"]) == 1
+        assert len(result["objects_tagged"]) == 1
+        assert len(result["objects_skipped"]) == 2

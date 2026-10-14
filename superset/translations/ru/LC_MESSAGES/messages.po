@@ -746,6 +746,9 @@ msgid ""
 "templating syntax"
 msgstr "Набор параметров, доступных в запросе через шаблоны Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid ""
 "A time series chart that visualizes how a related metric from multiple "
 "groups vary over time. Each group is visualized using a different color."
@@ -4852,6 +4855,9 @@ msgstr "Равно (=)"
 
 msgid "Error"
 msgstr "Ошибка"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "Ошибка получения списка объектов с тегами"

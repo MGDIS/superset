@@ -709,6 +709,9 @@ msgid ""
 "templating syntax"
 msgstr "在查詢中可用的一組参數使用 Jinja 模板語法"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid ""
 "A time series chart that visualizes how a related metric from multiple "
 "groups vary over time. Each group is visualized using a different color."
@@ -4789,6 +4792,9 @@ msgstr "等於（=）"
 
 msgid "Error"
 msgstr "錯誤"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

@@ -21,7 +21,11 @@ from flask_appbuilder.models.sqla import Model
 
 from superset import db
 from superset.commands.base import BaseCommand, UpdateMixin
-from superset.commands.tag.exceptions import TagInvalidError, TagNotFoundError
+from superset.commands.tag.exceptions import (
+    TagInvalidError,
+    TagNameExistsValidationError,
+    TagNotFoundError,
+)
 from superset.commands.tag.utils import (
     current_user_can_modify_object,
     to_object_model,
@@ -55,11 +59,15 @@ class UpdateTagCommand(UpdateMixin, BaseCommand):
         return self._model
 
     def validate(self) -> None:
-        exceptions = []
+        exceptions: list[TagNameExistsValidationError | TagInvalidError] = []
         # Validate/populate model exists
         self._model = TagDAO.find_by_id(self._model_id)
         if not self._model:
             raise TagNotFoundError()
+
+        existing = TagDAO.find_by_name(self._properties["name"].strip())
+        if existing and existing.id != self._model.id:
+            exceptions.append(TagNameExistsValidationError())
 
         # Validate object_id
         if objects_to_tag := self._properties.get("objects_to_tag"):
