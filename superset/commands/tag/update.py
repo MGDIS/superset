@@ -22,7 +22,11 @@ from flask_appbuilder.models.sqla import Model
 from superset import db
 from superset.commands.base import BaseCommand, UpdateMixin
 from superset.commands.tag.exceptions import TagInvalidError, TagNotFoundError
-from superset.commands.tag.utils import to_object_type
+from superset.commands.tag.utils import (
+    current_user_can_modify_object,
+    to_object_model,
+    to_object_type,
+)
 from superset.daos.tag import TagDAO
 from superset.tags.models import Tag
 from superset.utils.decorators import transaction
@@ -59,13 +63,22 @@ class UpdateTagCommand(UpdateMixin, BaseCommand):
 
         # Validate object_id
         if objects_to_tag := self._properties.get("objects_to_tag"):
+            skipped: set[tuple[str, int]] = set()
             # Validate object type
-            for obj_type, _ in objects_to_tag:
+            for obj_type, obj_id in objects_to_tag:
                 object_type = to_object_type(obj_type)
                 if not object_type:
                     exceptions.append(
                         TagInvalidError(f"invalid object type {object_type}")
                     )
+                    continue
+                if (
+                    model := to_object_model(object_type, obj_id, skip_base_filter=True)
+                ) and not current_user_can_modify_object(model):
+                    skipped.add((obj_type, obj_id))
+            self._properties["objects_to_tag"] = [
+                obj for obj in objects_to_tag if tuple(obj) not in skipped
+            ]
 
         if exceptions:
             raise TagInvalidError(exceptions=exceptions)
