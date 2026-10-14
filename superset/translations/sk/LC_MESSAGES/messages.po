@@ -718,6 +718,9 @@ msgid ""
 "templating syntax"
 msgstr ""
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr ""
 
@@ -5262,6 +5265,9 @@ msgid "Equals"
 msgstr ""
 
 msgid "Error"
+msgstr ""
+
+msgid "Error Creating Tag"
 msgstr ""
 
 msgid "Error Fetching Tagged Objects"

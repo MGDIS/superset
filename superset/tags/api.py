@@ -338,6 +338,8 @@ class TagRestApi(BaseSupersetModelRestApi):
         try:
             changed_model = UpdateTagCommand(pk, item).run()
             response = self.response(200, id=changed_model.id, result=item)
+        except TagInvalidError as ex:
+            response = self.response_422(message=ex.normalized_messages())
         except TagUpdateFailedError as ex:
             response = self.response_422(message=str(ex))
 

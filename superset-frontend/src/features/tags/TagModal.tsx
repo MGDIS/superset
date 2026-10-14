@@ -29,7 +29,7 @@ import {
   Modal,
 } from '@superset-ui/core/components';
 import { t } from '@apache-superset/core/translation';
-import { SupersetClient } from '@superset-ui/core';
+import { getClientErrorObject, SupersetClient } from '@superset-ui/core';
 import { styled, useTheme } from '@apache-superset/core/theme';
 import { Tag } from 'src/views/CRUD/types';
 import { fetchObjectsByTagIds } from 'src/features/tags/tags';
@@ -244,8 +244,9 @@ const TagModal: FC<TagModalProps> = ({
           addSuccessToast(t('Tag updated'));
           onHide();
         })
-        .catch(err => {
-          addDangerToast(err.message || 'Error Updating Tag');
+        .catch(async err => {
+          const { error } = await getClientErrorObject(err);
+          addDangerToast(error || 'Error Updating Tag');
         });
     } else {
       SupersetClient.post({
@@ -262,7 +263,10 @@ const TagModal: FC<TagModalProps> = ({
           addSuccessToast(t('Tag created'));
           onHide();
         })
-        .catch(err => addDangerToast(err.message || 'Error Creating Tag'));
+        .catch(async err => {
+          const { error } = await getClientErrorObject(err);
+          addDangerToast(error || t('Error Creating Tag'));
+        });
     }
   };
 

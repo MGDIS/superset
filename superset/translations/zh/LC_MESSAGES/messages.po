@@ -759,6 +759,9 @@ msgid ""
 "templating syntax"
 msgstr "在查询中可用的一组参数使用JINJA模板语法"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "查询超时。"
 
@@ -5660,6 +5663,9 @@ msgstr "顺序"
 
 msgid "Error"
 msgstr "错误"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

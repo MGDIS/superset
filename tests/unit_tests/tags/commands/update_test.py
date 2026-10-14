@@ -264,3 +264,156 @@ def test_update_command_remove_all_tagged_objects(
     assert (
         len(db.session.query(TaggedObject).filter_by(tag_id=updated_tag.id).all()) == 0
     )
+
+
+def test_update_command_existing_name_rejected(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.exceptions import TagInvalidError
+    from superset.commands.tag.update import UpdateTagCommand
+    from superset.daos.tag import TagDAO
+    from superset.tags.models import Tag
+
+    db.session.add(Tag(name="other_name", description="other_description"))
+    db.session.commit()
+    tag_to_update = TagDAO.find_by_name("test_name")
+
+    with pytest.raises(TagInvalidError) as excinfo:
+        UpdateTagCommand(
+            tag_to_update.id,
+            {"name": "other_name", "description": "new_description"},
+        ).run()
+
+    assert excinfo.value.normalized_messages() == {
+        "name": ["A tag with this name already exists"]
+    }
+    assert TagDAO.find_by_name("test_name").description == "test_description"
+
+
+def test_update_command_keeps_name_with_string_id(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.update import UpdateTagCommand
+    from superset.daos.tag import TagDAO
+
+    tag_to_update = TagDAO.find_by_name("test_name")
+
+    UpdateTagCommand(
+        str(tag_to_update.id),  # type: ignore
+        {"name": "test_name", "description": "new_description"},
+    ).run()
+
+    assert TagDAO.find_by_name("test_name").description == "new_description"
+
+
+def _tag_dashboard_and_chart_then_deny_dashboard(mocker: MockerFixture):
+    from superset.commands.tag.create import CreateCustomTagWithRelationshipsCommand
+    from superset.daos.tag import TagDAO
+    from superset.models.dashboard import Dashboard
+    from superset.models.slice import Slice
+    from superset.tags.models import ObjectType
+
+    dashboard = db.session.query(Dashboard).first()
+    chart = db.session.query(Slice).first()
+
+    mocker.patch(
+        "superset.security.SupersetSecurityManager.is_admin", return_value=True
+    )
+    mocker.patch("superset.daos.chart.ChartDAO.find_by_id", return_value=chart)
+    mocker.patch(
+        "superset.daos.dashboard.DashboardDAO.find_by_id", return_value=dashboard
+    )
+
+    CreateCustomTagWithRelationshipsCommand(
+        data={
+            "name": "test_tag",
+            "objects_to_tag": [
+                (ObjectType.dashboard, dashboard.id),
+                (ObjectType.chart, chart.id),
+            ],
+        }
+    ).run()
+
+    def can_modify(model):
+        return isinstance(model, Slice)
+
+    mocker.patch(
+        "superset.commands.tag.update.current_user_can_modify_object",
+        side_effect=can_modify,
+    )
+    mocker.patch(
+        "superset.daos.tag.current_user_can_modify_object",
+        side_effect=can_modify,
+    )
+    return TagDAO.find_by_name("test_tag"), dashboard, chart
+
+
+def test_update_command_keeps_links_of_inaccessible_objects(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.update import UpdateTagCommand
+    from superset.tags.models import ObjectType, TaggedObject
+
+    tag, dashboard, chart = _tag_dashboard_and_chart_then_deny_dashboard(mocker)
+
+    UpdateTagCommand(
+        tag.id,
+        {
+            "name": "test_tag",
+            "description": "",
+            "objects_to_tag": [(ObjectType.chart, chart.id)],
+        },
+    ).run()
+
+    remaining = {
+        (obj.object_type, obj.object_id) for obj in db.session.query(TaggedObject)
+    }
+    assert (ObjectType.dashboard, dashboard.id) in remaining
+    assert (ObjectType.chart, chart.id) in remaining
+
+
+def test_update_command_empty_objects_only_removes_accessible_links(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.update import UpdateTagCommand
+    from superset.tags.models import ObjectType, TaggedObject
+
+    tag, dashboard, chart = _tag_dashboard_and_chart_then_deny_dashboard(mocker)
+
+    UpdateTagCommand(
+        tag.id,
+        {"name": "test_tag", "description": "", "objects_to_tag": []},
+    ).run()
+
+    remaining = {
+        (obj.object_type, obj.object_id) for obj in db.session.query(TaggedObject)
+    }
+    assert remaining == {(ObjectType.dashboard, dashboard.id)}
+
+
+def test_update_command_skips_adding_inaccessible_objects(
+    session_with_data: Session, mocker: MockerFixture
+):
+    from superset.commands.tag.update import UpdateTagCommand
+    from superset.tags.models import ObjectType, TaggedObject
+
+    tag, dashboard, chart = _tag_dashboard_and_chart_then_deny_dashboard(mocker)
+    db.session.query(TaggedObject).delete()
+    db.session.commit()
+
+    UpdateTagCommand(
+        tag.id,
+        {
+            "name": "test_tag",
+            "description": "",
+            "objects_to_tag": [
+                (ObjectType.dashboard, dashboard.id),
+                (ObjectType.chart, chart.id),
+            ],
+        },
+    ).run()
+
+    remaining = {
+        (obj.object_type, obj.object_id) for obj in db.session.query(TaggedObject)
+    }
+    assert remaining == {(ObjectType.chart, chart.id)}

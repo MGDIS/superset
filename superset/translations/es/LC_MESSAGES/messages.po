@@ -821,6 +821,9 @@ msgstr ""
 "Un conjunto de parámetros que están disponibles en la consulta utilizando"
 " la sintaxis de plantillas Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Se ha agotado el tiempo de espera al ejecutar la consulta."
 
@@ -5773,6 +5776,9 @@ msgstr "Secuencial"
 
 msgid "Error"
 msgstr "Error"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "Error al recuperar objetos etiquetados"

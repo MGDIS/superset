@@ -782,6 +782,9 @@ msgstr ""
 "Een set parameters die beschikbaar worden in de query met behulp van "
 "Jinja templating syntax"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Er is een time-out opgetreden tijdens het uitvoeren van de query."
 
@@ -5773,6 +5776,9 @@ msgstr "Sequentieel"
 
 msgid "Error"
 msgstr "Fout"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "Fout bij ophalen van getagde objecten"

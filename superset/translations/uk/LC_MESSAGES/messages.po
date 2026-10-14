@@ -790,6 +790,9 @@ msgstr ""
 "Набір параметрів, які стають доступними у запиті за допомогою синтаксису "
 "шаблону Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Під час виконання запиту стався таймаут."
 
@@ -5768,6 +5771,9 @@ msgstr "Послідовний"
 
 msgid "Error"
 msgstr "Помилка"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

@@ -799,6 +799,9 @@ msgstr ""
 "Um conjunto de parâmetros que tornar-se disponível na consulta usando a "
 "sintaxe de modelagem Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Ocorreu um tempo limite durante a execução da consulta."
 
@@ -5836,6 +5839,9 @@ msgstr "Sequencial"
 
 msgid "Error"
 msgstr "Erro"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

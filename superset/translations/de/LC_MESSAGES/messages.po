@@ -818,6 +818,9 @@ msgstr ""
 "Ein Satz von Parametern, die in der Abfrage mithilfe der Jinja-"
 "Vorlagensyntax verfügbar werden"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Beim Ausführen der Abfrage ist ein Timeout aufgetreten."
 
@@ -5824,6 +5827,9 @@ msgstr "Fortlaufend"
 
 msgid "Error"
 msgstr "Fehler"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "Fehler beim Abrufen von markierten Objekten"

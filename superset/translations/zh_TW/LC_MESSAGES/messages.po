@@ -758,6 +758,9 @@ msgid ""
 "templating syntax"
 msgstr "在查詢中可用的一組参數使用 Jinja 模板語法"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "查詢超時。"
 
@@ -5664,6 +5667,9 @@ msgstr "順序"
 
 msgid "Error"
 msgstr "錯誤"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

@@ -809,6 +809,9 @@ msgid ""
 "templating syntax"
 msgstr "Набор параметров, доступных в запросе через шаблоны Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Превышен таймаут исполнения запроса"
 
@@ -5611,6 +5614,9 @@ msgstr "Равно"
 
 msgid "Error"
 msgstr "Ошибка"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "Ошибка получения списка объектов с тегами"

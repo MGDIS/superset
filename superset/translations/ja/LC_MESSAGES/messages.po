@@ -751,6 +751,9 @@ msgid ""
 "templating syntax"
 msgstr "Jinja テンプレート構文を使用してクエリで使用可能になるパラメーターのセット"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "クエリの実行中にタイムアウトが発生しました。"
 
@@ -5399,6 +5402,9 @@ msgstr "一連"
 
 msgid "Error"
 msgstr "エラー"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "タグ付きオブジェクトの取得エラー"

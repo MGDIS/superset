@@ -745,6 +745,9 @@ msgid ""
 "templating syntax"
 msgstr ""
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 #, fuzzy
 msgid "A timeout occurred while executing the query."
 msgstr "Errore nel creare il datasource"
@@ -5619,6 +5622,9 @@ msgstr ""
 #, fuzzy
 msgid "Error"
 msgstr "Errore..."
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

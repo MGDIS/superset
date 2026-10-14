@@ -816,6 +816,9 @@ msgstr ""
 "Nabor parametrov, ki postanejo razpoložljivi za poizvedbo z uporabo Jinja"
 " sintakse"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid "A timeout occurred while executing the query."
 msgstr "Pri izvajanju poizvedbe je potekel čas."
 
@@ -5717,6 +5720,9 @@ msgstr "Sekvenčni"
 
 msgid "Error"
 msgstr "Napaka"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 msgid "Error Fetching Tagged Objects"
 msgstr "Pri pridobivanju označenih elementov je prišlo do napake"
