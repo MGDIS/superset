@@ -21,7 +21,11 @@ from flask import g
 from sqlalchemy.exc import NoResultFound
 
 from superset.commands.tag.exceptions import TagNotFoundError
-from superset.commands.tag.utils import to_object_type
+from superset.commands.tag.utils import (
+    current_user_can_modify_object,
+    to_object_model,
+    to_object_type,
+)
 from superset.daos.base import BaseDAO
 from superset.daos.chart import ChartDAO
 from superset.daos.dashboard import DashboardDAO
@@ -327,6 +331,11 @@ class TagDAO(BaseDAO[Tag]):
         ]
 
     @staticmethod
+    def _can_remove_tagged_object(object_type: ObjectType, object_id: int) -> bool:
+        model = to_object_model(object_type, object_id, skip_base_filter=True)
+        return model is None or current_user_can_modify_object(model)
+
+    @staticmethod
     def create_tag_relationship(
         objects_to_tag: list[tuple[ObjectType, int]],
         tag: Tag,
@@ -370,6 +379,11 @@ class TagDAO(BaseDAO[Tag]):
                 )
 
         if not bulk_create:
+            tagged_objects_to_delete = {
+                (object_type, object_id)
+                for object_type, object_id in tagged_objects_to_delete
+                if TagDAO._can_remove_tagged_object(object_type, object_id)
+            }
             # delete relationships that aren't retained from single tag create
             for object_type, object_id in tagged_objects_to_delete:
                 # delete objects that were removed
