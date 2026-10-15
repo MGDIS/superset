@@ -256,7 +256,7 @@ const TagModal: FC<TagModalProps> = ({
           addSuccessToast(t('Tag created'));
           onHide();
         })
-        .catch(err => addDangerToast(err.message || 'Error Creating Tag'));
+        .catch(err => addDangerToast(err.message || t('Error Creating Tag')));
     }
   };
 

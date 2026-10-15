@@ -5221,6 +5221,9 @@ msgstr "Égal à (=)"
 msgid "Error"
 msgstr "Erreur"
 
+msgid "Error Creating Tag"
+msgstr "Erreur lors de la création de l'étiquette"
+
 #, fuzzy
 msgid "Error Fetching Tagged Objects"
 msgstr ""
