@@ -755,6 +755,9 @@ msgstr ""
 "connexe de plusieurs groupes varie au fil du temps. Chaque groupe est "
 "visualisé en utilisant une couleur différente."
 
+msgid "A tag with this name already exists"
+msgstr "Une étiquette portant ce nom existe déjà"
+
 msgid "A timeout occurred while executing the query."
 msgstr "Un dépassement de délai s'est produit lors de l'exécution de la requête."
 
@@ -5217,6 +5220,9 @@ msgstr "Égal à (=)"
 #, fuzzy
 msgid "Error"
 msgstr "Erreur"
+
+msgid "Error Creating Tag"
+msgstr "Erreur lors de la création de l'étiquette"
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

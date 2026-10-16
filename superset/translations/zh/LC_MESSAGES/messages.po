@@ -710,6 +710,9 @@ msgid ""
 "templating syntax"
 msgstr "在查询中可用的一组参数使用JINJA模板语法"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid ""
 "A time series chart that visualizes how a related metric from multiple "
 "groups vary over time. Each group is visualized using a different color."
@@ -4786,6 +4789,9 @@ msgstr "等于（=）"
 
 msgid "Error"
 msgstr "错误"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"

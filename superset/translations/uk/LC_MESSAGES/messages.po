@@ -740,6 +740,9 @@ msgstr ""
 "Набір параметрів, які стають доступними у запиті за допомогою синтаксису "
 "шаблону Jinja"
 
+msgid "A tag with this name already exists"
+msgstr ""
+
 msgid ""
 "A time series chart that visualizes how a related metric from multiple "
 "groups vary over time. Each group is visualized using a different color."
@@ -4890,6 +4893,9 @@ msgstr "Дорівнює (=)"
 
 msgid "Error"
 msgstr "Помилка"
+
+msgid "Error Creating Tag"
+msgstr ""
 
 #, fuzzy
 msgid "Error Fetching Tagged Objects"
