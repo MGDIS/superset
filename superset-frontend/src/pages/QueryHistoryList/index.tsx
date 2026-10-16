@@ -54,8 +54,8 @@ import QueryPreviewModal from 'src/features/queries/QueryPreviewModal';
 import { addSuccessToast } from 'src/components/MessageToasts/actions';
 import getOwnerName from 'src/utils/getOwnerName';
 import { extendedDayjs } from 'src/utils/dates';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
-const PAGE_SIZE = 25;
 const SQL_PREVIEW_MAX_LINES = 4;
 
 const TopAlignedListView = styled(ListView)<ListViewProps<QueryObject>>`

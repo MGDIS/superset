@@ -113,6 +113,7 @@ FRONTEND_CONF_KEYS = (
     "PREVENT_UNSAFE_DEFAULT_URLS_ON_DATASET",
     "JWT_ACCESS_CSRF_COOKIE_NAME",
     "SQLLAB_QUERY_RESULT_TIMEOUT",
+    "LIST_VIEW_PAGE_SIZE",
 )
 
 logger = logging.getLogger(__name__)
@@ -310,6 +311,13 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
         k: (list(conf.get(k)) if isinstance(conf.get(k), set) else conf.get(k))
         for k in FRONTEND_CONF_KEYS
     }
+
+    page_size = conf.get("LIST_VIEW_PAGE_SIZE")
+    max_page_size = conf.get("FAB_API_MAX_PAGE_SIZE")
+    is_valid_page_size = isinstance(page_size, int) and 1 <= page_size <= max_page_size
+
+    # Fall back to the default as FAB truncates pages above its API cap.
+    frontend_config["LIST_VIEW_PAGE_SIZE"] = page_size if is_valid_page_size else 25
 
     if conf.get("SLACK_API_TOKEN"):
         frontend_config["ALERT_REPORTS_NOTIFICATION_METHODS"] = [
