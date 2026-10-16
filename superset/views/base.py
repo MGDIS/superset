@@ -312,6 +312,13 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
         for k in FRONTEND_CONF_KEYS
     }
 
+    page_size = conf.get("LIST_VIEW_PAGE_SIZE")
+    max_page_size = conf.get("FAB_API_MAX_PAGE_SIZE")
+    is_valid_page_size = isinstance(page_size, int) and 1 <= page_size <= max_page_size
+
+    # Fall back to the default as FAB truncates pages above its API cap.
+    frontend_config["LIST_VIEW_PAGE_SIZE"] = page_size if is_valid_page_size else 25
+
     if conf.get("SLACK_API_TOKEN"):
         frontend_config["ALERT_REPORTS_NOTIFICATION_METHODS"] = [
             ReportRecipientType.EMAIL,

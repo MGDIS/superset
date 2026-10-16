@@ -162,6 +162,7 @@ NATIVE_FILTER_DEFAULT_ROW_LIMIT = 1000
 # max rows retrieved by filter select auto complete
 FILTER_SELECT_ROW_LIMIT = 10000
 # default number of rows per page in CRUD list views (charts, dashboards, datasets...)
+# must be an integer between 1 and FAB_API_MAX_PAGE_SIZE (100), otherwise 25
 LIST_VIEW_PAGE_SIZE = 25
 # default time filter in explore
 # values may be "Last day", "Last week", "<ISO date> : now", etc.
