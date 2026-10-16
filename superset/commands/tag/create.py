@@ -94,7 +94,7 @@ class CreateCustomTagWithRelationshipsCommand(CreateMixin, BaseCommand):
         return set(self._properties["objects_to_tag"]), self._skipped_tagged_objects
 
     def validate(self) -> None:
-        exceptions = []
+        exceptions: list[TagNameExistsValidationError | TagInvalidError] = []
         if not self._bulk_create and TagDAO.find_by_name(
             self._properties["name"].strip()
         ):
