@@ -118,7 +118,6 @@ jobs:
         shell: bash
         run: |
           export SUPERSET_BUILD_TARGET=${{ matrix.build_preset }}
-          export SUPERSET_LOAD_EXAMPLES=no
           # This should reuse the CACHED image built in the previous steps
           docker compose build superset-init --build-arg DEV_MODE=false --build-arg INCLUDE_CHROMIUM=false
           docker compose up superset-init --exit-code-from superset-init
