@@ -856,6 +856,26 @@ class TestDatasetApi(SupersetTestCase):
         assert alpha in model.owners
         self.items_to_delete = [model]
 
+    @pytest.mark.usefixtures("load_energy_table_with_slice")
+    def test_create_dataset_invalid_sql(self):
+        """
+        Dataset API: Test create dataset with a query the database rejects
+        """
+        energy_usage_ds = self.get_energy_usage_dataset()
+        self.login(ADMIN_USERNAME)
+        table_data = {
+            "database": energy_usage_ds.database_id,
+            "table_name": "energy_usage_invalid_sql",
+            "sql": "SELECT",
+        }
+        if schema := get_example_default_schema():
+            table_data["schema"] = schema
+        rv = self.post_assert_metric("/api/v1/dataset/", table_data, "post")
+        assert rv.status_code == 400
+        data = json.loads(rv.data.decode("utf-8"))
+        assert data["errors"][0]["error_type"] == "GENERIC_DB_ENGINE_ERROR"
+        assert data["errors"][0]["message"]
+
     @unittest.skip("test is failing stochastically")
     def test_create_dataset_same_name_different_schema(self):
         if backend() == "sqlite":
