@@ -31,8 +31,10 @@ from sqlalchemy.sql.type_api import TypeEngine
 
 from superset import db
 from superset.constants import LRU_CACHE_MAX_SIZE
+from superset.db_engine_specs.exceptions import SupersetDBAPIError
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 from superset.exceptions import (
+    SupersetErrorException,
     SupersetGenericDBErrorException,
     SupersetParseError,
     SupersetSecurityException,
@@ -162,6 +164,13 @@ def get_columns_description(
             result = db_engine_spec.fetch_data(cursor, limit=limit)
             result_set = SupersetResultSet(result, cursor.description, db_engine_spec)
             return result_set.columns
+    except (SupersetErrorException, SupersetDBAPIError):
+        # Preserve exceptions that already carry specific, actionable typing
+        # (e.g. OAuth2RedirectError, or a driver connection/timeout error
+        # normalized by ``db_engine_spec.execute`` via its ``custom_errors``
+        # mapping) so callers can act on them instead of seeing an opaque
+        # generic DB error.
+        raise
     except Exception as ex:
         raise SupersetGenericDBErrorException(message=str(ex)) from ex
 
