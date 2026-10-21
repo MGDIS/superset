@@ -59,6 +59,7 @@ import { DatabaseObject } from 'src/features/databases/types';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
 import { ModalTitleWithIcon } from 'src/components/ModalTitleWithIcon';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const extensionsRegistry = getExtensionsRegistry();
 const DatabaseDeleteRelatedExtension = extensionsRegistry.get(
@@ -67,8 +68,6 @@ const DatabaseDeleteRelatedExtension = extensionsRegistry.get(
 const dbConfigExtraExtension = extensionsRegistry.get(
   'databaseconnection.extraOption',
 );
-
-const PAGE_SIZE = 25;
 
 interface DatabaseDeleteObject extends DatabaseObject {
   charts: any;

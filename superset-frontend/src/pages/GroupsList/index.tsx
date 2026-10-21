@@ -39,8 +39,7 @@ import {
   DeleteModal,
 } from '@superset-ui/core/components';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface GroupsListProps {
   user: {

@@ -36,8 +36,7 @@ import {
 } from 'src/views/CRUD/hooks';
 import { AlertObject, LogObject } from 'src/features/alerts/types';
 import { AnnotationObject } from 'src/features/annotations/types';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const StyledHeader = styled.div`
   ${({ theme }) => css`

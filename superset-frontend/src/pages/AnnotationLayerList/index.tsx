@@ -44,8 +44,7 @@ import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { navigateTo } from 'src/utils/navigationUtils';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface AnnotationLayersListProps {
   addDangerToast: (msg: string) => void;

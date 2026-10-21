@@ -41,8 +41,7 @@ import { AnnotationObject } from 'src/features/annotations/types';
 import AnnotationModal from 'src/features/annotations/AnnotationModal';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { Typography } from '@superset-ui/core/components/Typography';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface AnnotationListProps {
   addDangerToast: (msg: string) => void;

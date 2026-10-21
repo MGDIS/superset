@@ -130,6 +130,7 @@ FRONTEND_CONF_KEYS = (
     "TABLE_VIZ_MAX_ROW_SERVER",
     "MAPBOX_API_KEY",
     "CSV_STREAMING_ROW_THRESHOLD",
+    "LIST_VIEW_PAGE_SIZE",
 )
 
 logger = logging.getLogger(__name__)
@@ -462,6 +463,13 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
         )
         for k in FRONTEND_CONF_KEYS
     }
+
+    page_size = app.config.get("LIST_VIEW_PAGE_SIZE")
+    max_page_size = app.config.get("FAB_API_MAX_PAGE_SIZE")
+    is_valid_page_size = isinstance(page_size, int) and 1 <= page_size <= max_page_size
+
+    # Fall back to the default as FAB truncates pages above its API cap.
+    frontend_config["LIST_VIEW_PAGE_SIZE"] = page_size if is_valid_page_size else 25
 
     if app.config.get("SLACK_API_TOKEN"):
         frontend_config["ALERT_REPORTS_NOTIFICATION_METHODS"] = [

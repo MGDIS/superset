@@ -37,6 +37,7 @@ import RowLevelSecurityModal from 'src/features/rls/RowLevelSecurityModal';
 import { RLSObject } from 'src/features/rls/types';
 import { createErrorHandler, createFetchRelated } from 'src/views/CRUD/utils';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface RLSProps {
   addDangerToast: (msg: string) => void;
@@ -315,8 +316,6 @@ function RowLevelSecurityList(props: RLSProps) {
   );
 
   const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];
-  const PAGE_SIZE = 25;
-
   const subMenuButtons: SubMenuProps['buttons'] = [];
 
   if (canWrite) {

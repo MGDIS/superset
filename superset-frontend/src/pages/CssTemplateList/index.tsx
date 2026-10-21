@@ -41,8 +41,7 @@ import CssTemplateModal from 'src/features/cssTemplates/CssTemplateModal';
 import { TemplateObject } from 'src/features/cssTemplates/types';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { Icons } from '@superset-ui/core/components/Icons';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface CssTemplatesListProps {
   addDangerToast: (msg: string) => void;

@@ -61,7 +61,6 @@ import WarningIconWithTooltip from '@superset-ui/core/components/WarningIconWith
 import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
 
 import {
-  PAGE_SIZE,
   SORT_BY,
   PASSWORDS_NEEDED_MESSAGE,
   CONFIRM_OVERWRITE_MESSAGE,
@@ -70,6 +69,7 @@ import DuplicateDatasetModal from 'src/features/datasets/DuplicateDatasetModal';
 import { useSelector } from 'react-redux';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const extensionsRegistry = getExtensionsRegistry();
 const DatasetDeleteRelatedExtension = extensionsRegistry.get(

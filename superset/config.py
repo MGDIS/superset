@@ -178,6 +178,10 @@ SUPERSET_CLIENT_RETRY_MAX_DELAY = 10000  # Maximum retry delay cap in millisecon
 SUPERSET_CLIENT_RETRY_JITTER_MAX = 1000  # Maximum random jitter in milliseconds
 # HTTP status codes that should trigger retries (502, 503, 504 gateway errors)
 SUPERSET_CLIENT_RETRY_STATUS_CODES = [502, 503, 504]
+
+# Default number of rows per page in CRUD list views (charts, dashboards, datasets...)
+# must be an integer between 1 and FAB_API_MAX_PAGE_SIZE (100), otherwise 25
+LIST_VIEW_PAGE_SIZE = 25
 # default time filter in explore
 # values may be "Last day", "Last week", "<ISO date> : now", etc.
 DEFAULT_TIME_FILTER = utils.NO_TIME_RANGE

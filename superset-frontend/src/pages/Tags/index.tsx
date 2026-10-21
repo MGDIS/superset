@@ -46,8 +46,7 @@ import { Link } from 'react-router-dom';
 import { deleteTags } from 'src/features/tags/tags';
 import { QueryObjectColumns, Tag } from 'src/views/CRUD/types';
 import TagModal from 'src/features/tags/TagModal';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface TagListProps {
   addDangerToast: (msg: string) => void;

@@ -22,8 +22,7 @@ import { useListViewResource } from 'src/views/CRUD/hooks';
 import { ListView } from 'src/components';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import withToasts from 'src/components/MessageToasts/withToasts';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 type Extension = {
   id: number;

@@ -66,10 +66,9 @@ import { AlertObject, AlertState } from 'src/features/alerts/types';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const extensionsRegistry = getExtensionsRegistry();
-
-const PAGE_SIZE = 25;
 
 const AlertStateLabel: Record<AlertState, string> = {
   [AlertState.Success]: t('Success'),

@@ -29,6 +29,7 @@ import {
 } from 'src/components/ListView';
 import { Typography } from '@superset-ui/core/components';
 import { fetchUserOptions } from 'src/features/groups/utils';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 export type ActionLogObject = {
   user: {
@@ -45,8 +46,6 @@ export type ActionLogObject = {
   duration_ms?: number;
   referrer?: string;
 };
-
-const PAGE_SIZE = 25;
 
 function ActionLogList() {
   const { addDangerToast, addSuccessToast } = useToasts();

@@ -30,8 +30,7 @@ import {
 import { DeleteModal } from '@superset-ui/core/components';
 import { ActionProps, ActionsBar } from 'src/components/ListView/ActionsBar';
 import SubMenu from 'src/features/home/SubMenu';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 export type UserRegistration = {
   id: number;

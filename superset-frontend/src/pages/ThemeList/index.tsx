@@ -61,8 +61,7 @@ import {
   unsetSystemDefaultTheme,
   unsetSystemDarkTheme,
 } from 'src/features/themes/api';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const FlexRowContainer = styled.div`
   align-items: center;

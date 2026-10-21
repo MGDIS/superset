@@ -44,8 +44,7 @@ import {
   fetchPermissionOptions,
 } from 'src/features/roles/utils';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface RolesListProps {
   addDangerToast: (msg: string) => void;

@@ -43,8 +43,7 @@ import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { deleteUser } from 'src/features/users/utils';
 import { fetchPaginatedData } from 'src/utils/fetchOptions';
 import type { UsersListProps, Group, Role, UserObject } from './types';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 enum ModalType {
   ADD = 'add',
