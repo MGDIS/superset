@@ -30,6 +30,7 @@ import fetchMock from 'fetch-mock';
 import { getClientErrorObject } from '@superset-ui/core';
 import { SaveDatasetModal } from 'src/SqlLab/components/SaveDatasetModal';
 import { createDatasource } from 'src/SqlLab/actions/sqlLab';
+import { postFormData } from 'src/explore/exploreUtils/formData';
 import { user, testQuery, mockdatasets } from 'src/SqlLab/fixtures';
 
 jest.mock('@superset-ui/core', () => ({
@@ -340,5 +341,31 @@ describe('SaveDatasetModal', () => {
     await waitFor(() => {
       expect(dummyDispatch).toHaveBeenCalled();
     });
+  });
+
+  it('dispatches an error toast and keeps the modal open when saving the dataset fails', async () => {
+    const dummyDispatch = jest.fn().mockResolvedValue({ id: 1 });
+    useDispatchMock.mockReturnValue(dummyDispatch);
+    useSelectorMock.mockReturnValue({ ...user });
+    mockedGetClientErrorObject.mockClear();
+    (postFormData as jest.Mock).mockRejectedValueOnce(new Error('Boom'));
+    const onHide = jest.fn();
+
+    render(<SaveDatasetModal {...mockedProps} onHide={onHide} />, {
+      useRedux: true,
+    });
+
+    fireEvent.change(screen.getByDisplayValue(/unimportant/i), {
+      target: { value: 'my dataset' },
+    });
+    userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => {
+      expect(mockedGetClientErrorObject).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(dummyDispatch).toHaveBeenCalledTimes(2);
+    });
+    expect(onHide).not.toHaveBeenCalled();
   });
 });
