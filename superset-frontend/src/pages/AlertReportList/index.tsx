@@ -55,10 +55,9 @@ import AlertReportModal from 'src/features/alerts/AlertReportModal';
 import { AlertObject, AlertState } from 'src/features/alerts/types';
 import { ModifiedInfo } from 'src/components/AuditInfo';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const extensionsRegistry = getExtensionsRegistry();
-
-const PAGE_SIZE = 25;
 
 const AlertStateLabel: Record<AlertState, string> = {
   [AlertState.Success]: t('Success'),

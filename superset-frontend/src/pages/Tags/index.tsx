@@ -42,8 +42,7 @@ import { QueryObjectColumns, Tag } from 'src/views/CRUD/types';
 import TagModal from 'src/features/tags/TagModal';
 import FaveStar from 'src/components/FaveStar';
 import { ModifiedInfo } from 'src/components/AuditInfo';
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 interface TagListProps {
   addDangerToast: (msg: string) => void;

@@ -52,6 +52,7 @@ import UploadDataModal from 'src/features/databases/UploadDataModel';
 import { DatabaseObject } from 'src/features/databases/types';
 import { ModifiedInfo } from 'src/components/AuditInfo';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
+import { PAGE_SIZE } from 'src/views/CRUD/constants';
 
 const extensionsRegistry = getExtensionsRegistry();
 const DatabaseDeleteRelatedExtension = extensionsRegistry.get(
@@ -60,8 +61,6 @@ const DatabaseDeleteRelatedExtension = extensionsRegistry.get(
 const dbConfigExtraExtension = extensionsRegistry.get(
   'databaseconnection.extraOption',
 );
-
-const PAGE_SIZE = 25;
 
 interface DatabaseDeleteObject extends DatabaseObject {
   charts: any;
