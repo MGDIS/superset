@@ -226,17 +226,42 @@ class DatasetDAO(BaseDAO[SqlaTable]):
                     )
 
         if override_columns:
-            db.session.query(TableColumn).filter(
-                TableColumn.table_id == model.id
-            ).delete(synchronize_session="fetch")
+            existing_by_name = {column.column_name: column for column in model.columns}
+            incoming_by_name = {
+                properties["column_name"]: properties for properties in property_columns
+            }
+            protected_keys = ("id", "table_id")
 
-            db.session.bulk_insert_mappings(
-                TableColumn,
-                [
-                    {**properties, "table_id": model.id}
-                    for properties in property_columns
-                ],
-            )
+            for name, column in existing_by_name.items():
+                if name in incoming_by_name:
+                    for key, value in incoming_by_name[name].items():
+                        if key not in protected_keys:
+                            setattr(column, key, value)
+
+            removed_columns = [
+                column
+                for name, column in existing_by_name.items()
+                if name not in incoming_by_name
+            ]
+            for column in removed_columns:
+                db.session.delete(column)
+            if removed_columns:
+                db.session.flush()
+
+            for name, properties in incoming_by_name.items():
+                if name not in existing_by_name:
+                    db.session.add(
+                        TableColumn(
+                            **{
+                                **{
+                                    key: value
+                                    for key, value in properties.items()
+                                    if key not in protected_keys
+                                },
+                                "table_id": model.id,
+                            }
+                        )
+                    )
         else:
             columns_by_id = {column.id: column for column in model.columns}
 
