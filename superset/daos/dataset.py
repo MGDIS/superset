@@ -211,64 +211,104 @@ class DatasetDAO(BaseDAO[SqlaTable]):
         - If a column Dict does not have an `id` then we create a new metric.
         - If there are extra columns on the metadata db that are not defined on the List
         then we delete.
+
+        With `override_columns`, columns are matched by `column_name` instead and the
+        payload `id` is ignored.
         """
 
-        for column in property_columns:
-            if (
-                "python_date_format" in column
-                and column["python_date_format"] is not None
-            ):
-                if not DatasetDAO.validate_python_date_format(
-                    column["python_date_format"]
-                ):
-                    raise ValueError(
-                        "python_date_format is an invalid date/timestamp format."
-                    )
-
+        cls._validate_column_date_formats(property_columns)
         if override_columns:
-            db.session.query(TableColumn).filter(
-                TableColumn.table_id == model.id
-            ).delete(synchronize_session="fetch")
-
-            db.session.bulk_insert_mappings(
-                TableColumn,
-                [
-                    {**properties, "table_id": model.id}
-                    for properties in property_columns
-                ],
-            )
+            cls._override_columns(model, property_columns)
         else:
-            columns_by_id = {column.id: column for column in model.columns}
+            cls._upsert_columns(model, property_columns)
 
-            property_columns_by_id = {
-                properties["id"]: properties
-                for properties in property_columns
-                if "id" in properties
-            }
-
-            db.session.bulk_insert_mappings(
-                TableColumn,
-                [
-                    {**properties, "table_id": model.id}
-                    for properties in property_columns
-                    if "id" not in properties
-                ],
-            )
-
-            db.session.bulk_update_mappings(
-                TableColumn,
-                [
-                    {**columns_by_id[properties["id"]].__dict__, **properties}
-                    for properties in property_columns_by_id.values()
-                ],
-            )
-
-            db.session.query(TableColumn).filter(
-                TableColumn.id.in_(
-                    {column.id for column in model.columns}
-                    - property_columns_by_id.keys()
+    @classmethod
+    def _validate_column_date_formats(
+        cls, property_columns: list[dict[str, Any]]
+    ) -> None:
+        for column in property_columns:
+            if column.get("python_date_format") is None:
+                continue
+            if not DatasetDAO.validate_python_date_format(column["python_date_format"]):
+                raise ValueError(
+                    "python_date_format is an invalid date/timestamp format."
                 )
-            ).delete(synchronize_session="fetch")
+
+    @classmethod
+    def _override_columns(
+        cls, model: SqlaTable, property_columns: list[dict[str, Any]]
+    ) -> None:
+        existing_by_name = {column.column_name: column for column in model.columns}
+        incoming_by_name = {
+            properties["column_name"]: properties for properties in property_columns
+        }
+        protected_keys = ("id", "table_id")
+
+        for name, column in existing_by_name.items():
+            if name in incoming_by_name:
+                for key, value in incoming_by_name[name].items():
+                    if key not in protected_keys:
+                        setattr(column, key, value)
+
+        removed_columns = [
+            column
+            for name, column in existing_by_name.items()
+            if name not in incoming_by_name
+        ]
+        for column in removed_columns:
+            db.session.delete(column)
+        if removed_columns:
+            db.session.flush()
+
+        for name, properties in incoming_by_name.items():
+            if name not in existing_by_name:
+                db.session.add(
+                    TableColumn(
+                        **{
+                            **{
+                                key: value
+                                for key, value in properties.items()
+                                if key not in protected_keys
+                            },
+                            "table_id": model.id,
+                        }
+                    )
+                )
+
+    @classmethod
+    def _upsert_columns(
+        cls, model: SqlaTable, property_columns: list[dict[str, Any]]
+    ) -> None:
+        columns_by_id = {column.id: column for column in model.columns}
+
+        property_columns_by_id = {
+            properties["id"]: properties
+            for properties in property_columns
+            if "id" in properties
+        }
+
+        db.session.bulk_insert_mappings(
+            TableColumn,
+            [
+                {**properties, "table_id": model.id}
+                for properties in property_columns
+                if "id" not in properties
+            ],
+        )
+
+        db.session.bulk_update_mappings(
+            TableColumn,
+            [
+                {**columns_by_id[properties["id"]].__dict__, **properties}
+                for properties in property_columns_by_id.values()
+            ],
+        )
+
+        db.session.query(TableColumn).filter(
+            TableColumn.id.in_(
+                {column.id for column in model.columns} - property_columns_by_id.keys()
+            )
+        ).delete(synchronize_session="fetch")
 
     @classmethod
     def update_metrics(
