@@ -24,6 +24,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: mgdis/supersetbot
+        ref: 0.5.16-mgdis.1
         path: supersetbot
 
     - name: Setup supersetbot from repo
