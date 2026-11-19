@@ -274,9 +274,14 @@ export function DatabaseSelector({
 
   useEffect(() => {
     if (databaseOptions?.length === 1) {
-      setCurrentDb(databaseOptions[0]);
+      // The option id is a DOM id. The database id is in the value property.
+      const databaseWithId = {
+        ...databaseOptions[0],
+        id: databaseOptions[0].value,
+      };
+      setCurrentDb(databaseWithId);
       if (onDbChange) {
-        onDbChange(databaseOptions[0]);
+        onDbChange(databaseWithId);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
