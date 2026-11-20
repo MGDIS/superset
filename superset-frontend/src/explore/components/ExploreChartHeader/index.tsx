@@ -84,8 +84,7 @@ export interface ExploreChartHeaderProps {
   isSaveModalVisible?: boolean;
 }
 
-const saveButtonStyles = (theme: SupersetTheme) => css`
-  color: ${theme.colorPrimaryText};
+const saveButtonStyles = css`
   & > span[role='img'] {
     margin-right: 0;
   }
@@ -324,7 +323,7 @@ export const ExploreChartHeader: FC<ExploreChartHeaderProps> = ({
             {/* needed to wrap button in a div - antd tooltip doesn't work with disabled button */}
             <div>
               <Button
-                buttonStyle="secondary"
+                buttonStyle="primary"
                 onClick={showModal}
                 disabled={saveDisabled}
                 data-test="query-save-button"
