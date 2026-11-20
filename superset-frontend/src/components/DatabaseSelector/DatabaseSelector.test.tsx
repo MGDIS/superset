@@ -390,3 +390,22 @@ test('Sends the correct schema when changing the schema', async () => {
   );
   expect(props.onSchemaChange).toHaveBeenCalledTimes(1);
 });
+
+test('Sends the numeric db id when only one database is available', async () => {
+  fetchMock.removeRoutes();
+  fetchMock.get(databaseApiRoute, {
+    ...fakeDatabaseApiResult,
+    count: 1,
+    ids: [1],
+    result: [fakeDatabaseApiResult.result[0]],
+  });
+  fetchMock.get(catalogApiRoute, fakeCatalogApiResult);
+  fetchMock.get(schemaApiRoute, fakeSchemaApiResult);
+  fetchMock.get(tablesApiRoute, fakeFunctionNamesApiResult);
+  const props = createProps();
+  render(<DatabaseSelector {...props} db={null} />, { useRedux: true, store });
+  await waitFor(() => expect(props.onDbChange).toHaveBeenCalled());
+  expect(props.onDbChange).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 1, value: 1 }),
+  );
+});
