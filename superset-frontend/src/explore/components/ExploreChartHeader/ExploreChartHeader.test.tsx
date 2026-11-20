@@ -427,6 +427,15 @@ describe('ExploreChartHeader', () => {
     setSaveChartModalVisibilityMock.mockClear();
   });
 
+  test('Save is a primary button', async () => {
+    const props = createProps();
+    render(<ExploreHeader {...props} />, { useRedux: true });
+
+    expect(await screen.findByTestId('query-save-button')).toHaveClass(
+      'superset-button-primary',
+    );
+  });
+
   test('Save disabled', async () => {
     const triggerManualSave = jest.fn();
 
