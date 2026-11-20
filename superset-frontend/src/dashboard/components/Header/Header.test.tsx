@@ -574,6 +574,18 @@ test('should toggle the edit mode', () => {
   expect(logEvent).toHaveBeenCalled();
 });
 
+test('should render "Edit dashboard" as a primary button', () => {
+  setup({
+    dashboardInfo: {
+      ...initialState.dashboardInfo,
+      dash_edit_perm: true,
+    },
+  });
+  expect(screen.getByTestId('edit-dashboard-button')).toHaveClass(
+    'superset-button-primary',
+  );
+});
+
 test('should render the dropdown icon', () => {
   setup();
   expect(screen.getByRole('img', { name: 'ellipsis' })).toBeInTheDocument();

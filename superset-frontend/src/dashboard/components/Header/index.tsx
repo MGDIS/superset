@@ -161,10 +161,6 @@ const headerContainerStyle = (theme: SupersetTheme) => css`
   border-bottom: 1px solid ${theme.colorBorder};
 `;
 
-const editButtonStyle = (theme: SupersetTheme) => css`
-  color: ${theme.colorPrimary};
-`;
-
 const actionButtonsStyle = (theme: SupersetTheme) => css`
   display: flex;
   align-items: center;
@@ -803,11 +799,10 @@ const Header = (): JSX.Element => {
             {NavExtension && <NavExtension />}
             {userCanEdit && (
               <Button
-                buttonStyle="secondary"
+                buttonStyle="primary"
                 onClick={handleEnterEditMode}
                 data-test="edit-dashboard-button"
                 className="action-button"
-                css={editButtonStyle}
                 aria-label={t('Edit dashboard')}
               >
                 {t('Edit dashboard')}
