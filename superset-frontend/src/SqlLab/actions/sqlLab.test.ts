@@ -2011,6 +2011,29 @@ describe('async actions', () => {
         ]);
       });
 
+      test('sends a null dbId when the tab has no database', async () => {
+        const oldQueryEditor = {
+          ...queryEditor,
+          dbId: undefined,
+          inLocalStorage: true,
+        };
+        const store = mockStore({
+          sqlLab: { queries: [], tables: [], databases: {} },
+        });
+
+        await store.dispatch(actions.syncQueryEditor(oldQueryEditor));
+
+        const call = fetchMock.callHistory.calls(updateTabStateEndpoint)[0];
+        const formData = call.options.body as FormData;
+        expect(JSON.parse(formData.get('queryEditor') as string)).toMatchObject(
+          { dbId: null },
+        );
+        expect(fetchMock.callHistory.calls('getDatabase')).toHaveLength(0);
+        expect(store.getActions()).toEqual([
+          expect.objectContaining({ type: actions.MIGRATE_QUERY_EDITOR }),
+        ]);
+      });
+
       test.each([
         { status: 400, body: { message: 'Bad request' } },
         { status: 403, body: { message: 'Forbidden' } },
